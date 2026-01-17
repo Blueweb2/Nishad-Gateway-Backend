@@ -1,0 +1,22 @@
+import { FastifyInstance } from "fastify";
+
+import adminRoutes from "./admin.routes";
+import blogRoutes from "./blog.routes";
+import serviceRoutes from "./service.routes";
+import subserviceRoutes from "./subservice.routes";
+import contentRoutes from "./content.routes";
+
+export default async function routes(app: FastifyInstance) {
+  // Auth/Admin
+  app.register(adminRoutes);
+
+  // Blog
+  app.register(blogRoutes);
+
+  // Services module
+  app.register(serviceRoutes);
+  app.register(subserviceRoutes);
+  app.register(contentRoutes);
+
+
+}
