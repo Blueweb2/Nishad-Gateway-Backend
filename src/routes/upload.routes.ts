@@ -4,5 +4,5 @@ import { auth } from "../middlewares/auth";
 import { adminOnly } from "../middlewares/adminOnly";
 
 export default async function uploadRoutes(app: FastifyInstance) {
-  app.post("/upload/image", { preHandler: [auth, adminOnly] }, uploadImage);
+  app.post("/image", { preHandler: [auth, adminOnly] }, uploadImage);
 }

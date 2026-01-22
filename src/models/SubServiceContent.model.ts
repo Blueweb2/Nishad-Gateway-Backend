@@ -1,7 +1,12 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
+import crypto from "crypto";
+
 
 export interface ISubServiceContent extends Document {
   subServiceId: Types.ObjectId;
+
+  sectionOrder: string[];
+
 
   // HERO
   heroTitle: string;
@@ -21,10 +26,16 @@ export interface ISubServiceContent extends Document {
   whyCtaText: string;
   whyCtaLink: string;
 
-
+// table of contents
   entityTableHeading: string;
+  entityTableColumns: {
+  key: string;
+  label: string;
+}[];
+
 
   entityTableRows: {
+    id: string;
     entityType: string;
     ownership: string;
     bestFor: string;
@@ -34,54 +45,63 @@ export interface ISubServiceContent extends Document {
     icon?: string;
   }[];
 
-// ✅ ENTITY TYPES SLIDER 
-entityTypesHeading: string;
-entityTypesDescription: string;
-entityTypesSlides: {
-  title: string;
-  image: string;
-  description?: string;
-}[];
-
-// ENTITY CHOOSE SECTION
-
-entityChooseHeading: string;
-entityChooseSubheading: string;
-entityChooseQuestions: {
-  question: string;
-  options: { label: string; value: string }[];
-  selectedValue?: string;
-}[];
-
-
-documentsHeading: string;
-documentsSubheading: string;
-
-documentEntityTabs: {
-  label: string; // LLC, Branch, RHQ...
-  value: string; // llc, branch...
-}[];
-
-documentGroups: {
-  entityValue: string; // link to tab value
-  cards: {
-    title: string; // Individual Shareholder
-    items: string[]; // Passport copy, etc
-    icon?: string; // optional
+  // ✅ ENTITY TYPES SLIDER 
+  entityTypesHeading: string;
+  entityTypesDescription: string;
+  entityTypesSlides: {
+    title: string;
+    image: string;
+    description?: string;
   }[];
-}[];
+
+  // ENTITY CHOOSE SECTION
+
+  entityChooseHeading: string;
+  entityChooseSubheading: string;
+  entityChooseQuestions: {
+    question: string;
+    options: { label: string; value: string }[];
+    selectedValue?: string;
+  }[];
 
 
-// ✅ LOCATIONS SLIDER
-locationsHeading: string;
-locationsSubheading: string;
-locationsSlides: {
-  title: string;
-  description: string;
-  image: string;
-  tag?: string; // ex: ARTICLE
-  link?: string; // optional click
-}[];
+  ownershipHeading: string;
+  ownershipSlides: {
+    title: string;
+    subtitle: string;
+    image: string;
+  }[];
+
+
+
+  documentsHeading: string;
+  documentsSubheading: string;
+
+  documentEntityTabs: {
+    label: string; // LLC, Branch, RHQ...
+    value: string; // llc, branch...
+  }[];
+
+  documentGroups: {
+    entityValue: string; // link to tab value
+    cards: {
+      title: string; // Individual Shareholder
+      items: string[]; // Passport copy, etc
+      icon?: string; // optional
+    }[];
+  }[];
+
+
+  //  LOCATIONS SLIDER
+  locationsHeading: string;
+  locationsSubheading: string;
+  locationsSlides: {
+    title: string;
+    description: string;
+    image: string;
+    tag?: string; // ex: ARTICLE
+    link?: string; // optional click
+  }[];
 
 
   // INTRO
@@ -100,6 +120,8 @@ locationsSlides: {
 
   faqs: { q: string; a: string }[];
 
+
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -113,6 +135,22 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       unique: true,
     },
 
+    sectionOrder: {
+      type: [String],
+      default: [
+        "hero",
+        "why",
+        "entityTable",
+        "entityTypes",
+        "ownership",
+        "entityChoose",
+        "documents",
+        "locations",
+        "faq",
+      ],
+    },
+
+
     // HERO
     heroTitle: { type: String, default: "" },
     heroSubtitle: { type: String, default: "" },
@@ -124,16 +162,16 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     // WHY SECTION (Slider)
     whyHeading: { type: String, default: "" },
 
-  whySlides: {
-  type: [
-    {
-      title: { type: String, default: "" },
-      description: { type: String, default: "" },
-      image: { type: String, default: "" },
+    whySlides: {
+      type: [
+        {
+          title: { type: String, default: "" },
+          description: { type: String, default: "" },
+          image: { type: String, default: "" },
+        },
+      ],
+      default: [],
     },
-  ],
-  default: [],
-},
 
 
     whyCtaText: { type: String, default: "" },
@@ -144,8 +182,27 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
 
     entityTableHeading: { type: String, default: "" },
 
+    entityTableColumns: {
+  type: [
+    {
+      key: { type: String, default: "" },
+      label: { type: String, default: "" },
+    },
+  ],
+  default: [
+    { key: "entityType", label: "Entity Type" },
+    { key: "ownership", label: "Ownership" },
+    { key: "bestFor", label: "Best For" },
+    { key: "capital", label: "Capital" },
+    { key: "regulatoryBody", label: "Regulatory Body" },
+    { key: "timeToSetup", label: "Time to Setup" },
+  ],
+},
+
+
     entityTableRows: [
       {
+        id: { type: String, default: () => crypto.randomUUID() },
         entityType: { type: String, default: "" },
         ownership: { type: String, default: "" },
         bestFor: { type: String, default: "" },
@@ -156,82 +213,98 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       },
     ],
 
-  // ✅ ENTITY TYPES SLIDER (NEW)
-entityTypesHeading: { type: String, default: "" },
-entityTypesDescription: { type: String, default: "" },
+    // ✅ ENTITY TYPES SLIDER (NEW)
+    entityTypesHeading: { type: String, default: "" },
+    entityTypesDescription: { type: String, default: "" },
 
-entityTypesSlides: [
-  {
-    title: { type: String, default: "" },
-    image: { type: String, default: "" },
-    description: { type: String, default: "" },
-  },
-],
-
-
-entityChooseHeading: { type: String, default: "" },
-entityChooseSubheading: { type: String, default: "" },
-entityChooseQuestions: [
-  {
-    question: { type: String, default: "" },
-    options: [
+    entityTypesSlides: [
       {
-        label: { type: String, default: "" },
-        value: { type: String, default: "" },
+        title: { type: String, default: "" },
+        image: { type: String, default: "" },
+        description: { type: String, default: "" },
       },
     ],
-    selectedValue: { type: String, default: "" },
-  },
-],
 
 
-documentsHeading: { type: String, default: "" },
-documentsSubheading: { type: String, default: "" },
+    entityChooseHeading: { type: String, default: "" },
+    entityChooseSubheading: { type: String, default: "" },
+    entityChooseQuestions: [
+      {
+        question: { type: String, default: "" },
+        options: [
+          {
+            label: { type: String, default: "" },
+            value: { type: String, default: "" },
+          },
+        ],
+        selectedValue: { type: String, default: "" },
+      },
+    ],
 
-documentEntityTabs: {
-  type: [
-    {
-      label: { type: String, default: "" },
-      value: { type: String, default: "" },
-    },
-  ],
-  default: [],
-},
 
-documentGroups: {
-  type: [
-    {
-      entityValue: { type: String, default: "" },
-      cards: [
+
+    ownershipHeading: { type: String, default: "" },
+
+    ownershipSlides: {
+      type: [
         {
           title: { type: String, default: "" },
-          items: { type: [String], default: [] },
-          icon: { type: String, default: "" },
+          subtitle: { type: String, default: "" },
+          image: { type: String, default: "" },
         },
       ],
+      default: [],
     },
-  ],
-  default: [],
-},
 
 
 
-// ✅ LOCATIONS SLIDER
-locationsHeading: { type: String, default: "" },
-locationsSubheading: { type: String, default: "" },
+    documentsHeading: { type: String, default: "" },
+    documentsSubheading: { type: String, default: "" },
 
-locationsSlides: {
-  type: [
-    {
-      title: { type: String, default: "" },
-      description: { type: String, default: "" },
-      image: { type: String, default: "" },
-      tag: { type: String, default: "ARTICLE" },
-      link: { type: String, default: "" },
+    documentEntityTabs: {
+      type: [
+        {
+          label: { type: String, default: "" },
+          value: { type: String, default: "" },
+        },
+      ],
+      default: [],
     },
-  ],
-  default: [],
-},
+
+    documentGroups: {
+      type: [
+        {
+          entityValue: { type: String, default: "" },
+          cards: [
+            {
+              title: { type: String, default: "" },
+              items: { type: [String], default: [] },
+              icon: { type: String, default: "" },
+            },
+          ],
+        },
+      ],
+      default: [],
+    },
+
+
+
+    // ✅ LOCATIONS SLIDER
+    locationsHeading: { type: String, default: "" },
+    locationsSubheading: { type: String, default: "" },
+
+    locationsSlides: {
+      type: [
+        {
+          title: { type: String, default: "" },
+          description: { type: String, default: "" },
+          image: { type: String, default: "" },
+          tag: { type: String, default: "ARTICLE" },
+          link: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
 
 
 

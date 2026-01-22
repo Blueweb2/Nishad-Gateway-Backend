@@ -6,6 +6,7 @@ import serviceRoutes from "./service.routes";
 import subserviceRoutes from "./subservice.routes";
 import contentRoutes from "./content.routes";
 import uploadRoutes from "./upload.routes";
+import leadRoutes from "./lead.routes";
 
 export default async function routes(app: FastifyInstance) {
   // Auth/Admin
@@ -20,7 +21,7 @@ export default async function routes(app: FastifyInstance) {
   app.register(contentRoutes);
 
 
-  app.register(uploadRoutes, { prefix: "/api" });
-
+ app.register(uploadRoutes, { prefix: "/upload" });
+  app.register(leadRoutes);
 
 }

@@ -8,6 +8,7 @@ import multipart from "@fastify/multipart";
 
 import fastifyStatic from "@fastify/static";
 import path from "path";
+import leadRoutes from "./routes/lead.routes";
 
 export const buildApp = () => {
   const app = Fastify({ logger: true });
@@ -41,6 +42,7 @@ app.register(fastifyStatic, {
 
 
   app.register(routes, { prefix: "/api" });
+// app.register(leadRoutes, { prefix: "/api" });
 
   return app;
 };

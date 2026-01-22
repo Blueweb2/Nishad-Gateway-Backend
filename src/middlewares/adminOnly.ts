@@ -12,7 +12,7 @@ export const adminOnly = async (req: FastifyRequest, reply: FastifyReply) => {
       });
     }
 
-    // ✅ check role from JWT payload
+    //  check role from JWT payload
     if (user.role !== "admin") {
       return reply.code(403).send({
         success: false,
