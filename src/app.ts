@@ -18,7 +18,7 @@ export const buildApp = async () => {
 
   // ✅ 2) cors after cookie
   await app.register(cors, {
-    origin: ["http://localhost:3000"],
+    origin: env.CLIENT_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
