@@ -1,5 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import Lead from "../models/Lead.model";
+import { sendResponse } from "../utils/response";
+
+import { createLeadService, getLeadsService } from "../services/lead.service";
 
 export type CreateLeadBody = {
   fullName: string;
@@ -35,27 +37,37 @@ export const createLeadController = async (
   reply: FastifyReply
 ) => {
   try {
-    const lead = await Lead.create(request.body);
-    return reply.code(201).send({ success: true, lead });
-  } catch (error) {
-    console.log(error);
-    return reply
-      .code(500)
-      .send({ success: false, message: "Lead save failed" });
+    const lead = await createLeadService(request.body);
+
+    return sendResponse(reply, 201, true, "Lead created", lead);
+  } catch (error: any) {
+    request.log.error(error);
+    return sendResponse(
+      reply,
+      error.statusCode || 500,
+      false,
+      error.message || "Lead save failed",
+      null
+    );
   }
 };
 
 export const getLeadsController = async (
-  _request: FastifyRequest,
+  request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    const leads = await Lead.find().sort({ createdAt: -1 });
-    return reply.send({ success: true, leads });
-  } catch (error) {
-    console.log(error);
-    return reply
-      .code(500)
-      .send({ success: false, message: "Lead fetch failed" });
+    const leads = await getLeadsService();
+
+    return sendResponse(reply, 200, true, "Leads fetched", leads);
+  } catch (error: any) {
+    request.log.error(error);
+    return sendResponse(
+      reply,
+      error.statusCode || 500,
+      false,
+      error.message || "Lead fetch failed",
+      null
+    );
   }
 };

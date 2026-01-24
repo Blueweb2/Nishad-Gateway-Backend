@@ -1,36 +1,46 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import cloudinary from "../config/cloudinary";
 import { sendResponse } from "../utils/response";
 
-export const uploadImage = async (req: FastifyRequest, reply: FastifyReply) => {
-  try {
-    const file = await (req as any).file();
+import { getSignedCloudinaryUploadParamsService } from "../services/cloudinarySigned.service";
 
-    if (!file) {
-      return sendResponse(reply, 400, false, "No file uploaded", null);
+// ===================================
+//  SIGNED UPLOAD PARAMS (secure flow)
+// ===================================
+export const getSignedUpload = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { folder } = req.query as { folder?: string };
+
+    if (!folder || folder.trim() === "") {
+      return sendResponse(reply, 400, false, "Folder is required", null);
     }
 
-    const buffer = await file.toBuffer();
+    const cleanFolder = folder.trim();
 
-    const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "nishad-gateway/subservices",
-          },
-          (error, uploaded) => {
-            if (error) reject(error);
-            else resolve(uploaded);
-          }
-        )
-        .end(buffer);
-    });
+    // ✅ Allowed folders (security)
+    const allowedFolders = [
+      "nishad-gateway/subservices",
+      "nishad-gateway/blogs",
+    ];
 
-    return sendResponse(reply, 200, true, "Image uploaded", {
-      url: result.secure_url,
-      publicId: result.public_id,
-    });
-  } catch (error) {
-    return sendResponse(reply, 500, false, "Upload failed", null);
+    if (!allowedFolders.includes(cleanFolder)) {
+      return sendResponse(reply, 403, false, "Invalid folder", null);
+    }
+
+    const signed = await getSignedCloudinaryUploadParamsService(cleanFolder);
+
+    return sendResponse(reply, 200, true, "Signed upload generated", signed);
+  } catch (err: any) {
+    req.log.error(err);
+
+    return sendResponse(
+      reply,
+      err.statusCode || 500,
+      false,
+      err?.message || "Signed upload failed",
+      null
+    );
   }
 };

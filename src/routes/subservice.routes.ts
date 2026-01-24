@@ -9,26 +9,37 @@ import {
 import { auth } from "../middlewares/auth";
 import { adminOnly } from "../middlewares/adminOnly";
 
-export default async function subserviceRoutes(app: FastifyInstance) {
-  // Public
-  app.get("/services/:serviceId/subservices", getSubServicesByService);
+import {
+  getSubServicesByServiceSchema,
+  createSubServiceSchema,
+  updateSubServiceSchema,
+  deleteSubServiceSchema,
+} from "../schemas/subservice.schema";
 
-  // Admin Protected
+export default async function subserviceRoutes(app: FastifyInstance) {
+  // ✅ Public
+  app.get(
+    "/services/:serviceId/subservices",
+    { schema: getSubServicesByServiceSchema },
+    getSubServicesByService
+  );
+
+  // ✅ Admin Protected
   app.post(
     "/services/:serviceId/subservices",
-    { preHandler: [auth, adminOnly] },
+    { preHandler: [auth, adminOnly], schema: createSubServiceSchema },
     createSubService
   );
 
   app.put(
     "/subservices/:subId",
-    { preHandler: [auth, adminOnly] },
+    { preHandler: [auth, adminOnly], schema: updateSubServiceSchema },
     updateSubService
   );
 
   app.delete(
     "/subservices/:subId",
-    { preHandler: [auth, adminOnly] },
+    { preHandler: [auth, adminOnly], schema: deleteSubServiceSchema },
     deleteSubService
   );
 }

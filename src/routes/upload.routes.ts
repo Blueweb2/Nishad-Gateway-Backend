@@ -1,8 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { uploadImage } from "../controllers/upload.controller";
 import { auth } from "../middlewares/auth";
 import { adminOnly } from "../middlewares/adminOnly";
+import { getSignedUpload } from "../controllers/upload.controller";
 
 export default async function uploadRoutes(app: FastifyInstance) {
-  app.post("/image", { preHandler: [auth, adminOnly] }, uploadImage);
+  // Signed Upload (secure)
+  app.get("/signed", { preHandler: [auth, adminOnly] }, getSignedUpload);
 }

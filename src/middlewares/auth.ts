@@ -1,16 +1,18 @@
-// verify jwt token middleware
-
 import { FastifyRequest, FastifyReply } from "fastify";
+import { sendResponse } from "../utils/response";
 
 export const auth = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
-    const token = req.cookies.admin_token;
+    const token = req.cookies?.admin_access_token;
+
     if (!token) {
-      return reply.code(401).send({ success: false, message: "Unauthorized" });
+      return sendResponse(reply, 401, false, "Unauthorized", null);
     }
 
-    req.user = req.server.jwt.verify(token);
+    const decoded = req.server.jwt.verify(token);
+    req.user = decoded;
+
   } catch (err) {
-    return reply.code(401).send({ success: false, message: "Invalid token" });
+    return sendResponse(reply, 401, false, "Invalid token", null);
   }
 };

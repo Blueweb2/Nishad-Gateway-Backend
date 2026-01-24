@@ -11,6 +11,7 @@ import leadRoutes from "./lead.routes";
 export default async function routes(app: FastifyInstance) {
   // Auth/Admin
   app.register(adminRoutes);
+  
 
   // Blog
   app.register(blogRoutes);

@@ -1,16 +1,21 @@
-// common response format
 import { FastifyReply } from "fastify";
 
-export const sendResponse = (
+export type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T | null;
+};
+
+export const sendResponse = <T>(
   reply: FastifyReply,
   statusCode: number,
   success: boolean,
   message: string,
-  data: any = null
+  data: T | null = null
 ) => {
-  return reply.status(statusCode).send({
+  return reply.code(statusCode).send({
     success,
     message,
     data,
-  });
+  } as ApiResponse<T>);
 };

@@ -65,12 +65,23 @@ export interface ISubServiceContent extends Document {
   }[];
 
 
-  ownershipHeading: string;
-  ownershipSlides: {
-    title: string;
-    subtitle: string;
-    image: string;
-  }[];
+// OWNERSHIP SLIDER
+ownershipHeading: string;
+
+// ✅ NEW
+ownershipTabOneLabel?: string;
+ownershipTabTwoLabel?: string;
+
+ownershipSlides: {
+  title: string;       // capsule text
+  leftText?: string;   // left text
+  rightText?: string;  // right text
+  image: string;
+}[];
+
+
+
+  // DOCUMENTS SECTION
 
 
 
@@ -213,17 +224,24 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       },
     ],
 
+
+
     // ✅ ENTITY TYPES SLIDER (NEW)
     entityTypesHeading: { type: String, default: "" },
     entityTypesDescription: { type: String, default: "" },
 
     entityTypesSlides: [
-      {
-        title: { type: String, default: "" },
-        image: { type: String, default: "" },
-        description: { type: String, default: "" },
-      },
-    ],
+  {
+    title: { type: String, default: "" },
+    description: { type: String, default: "" },
+
+    mainImage: { type: String, default: "" },
+    subImage: { type: String, default: "" },
+  },
+],
+
+
+    // ENTITY CHOOSE SECTION
 
 
     entityChooseHeading: { type: String, default: "" },
@@ -242,19 +260,26 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     ],
 
 
+// OWNERSHIP SLIDER
+ownershipHeading: { type: String, default: "" },
 
-    ownershipHeading: { type: String, default: "" },
+//  NEW TAB LABELS
+ownershipTabOneLabel: { type: String, default: "" },
+ownershipTabTwoLabel: { type: String, default: "" },
 
-    ownershipSlides: {
-      type: [
-        {
-          title: { type: String, default: "" },
-          subtitle: { type: String, default: "" },
-          image: { type: String, default: "" },
-        },
-      ],
-      default: [],
+//  UPDATED SLIDES
+ownershipSlides: {
+  type: [
+    {
+      title: { type: String, default: "" },
+      leftText: { type: String, default: "" },
+      rightText: { type: String, default: "" },
+      image: { type: String, default: "" },
     },
+  ],
+  default: [],
+},
+
 
 
 

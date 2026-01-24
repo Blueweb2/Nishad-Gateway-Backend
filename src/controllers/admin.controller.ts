@@ -1,53 +1,101 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import bcrypt from "bcryptjs";
-import { Admin } from "../models/Admin.model";
 import { sendResponse } from "../utils/response";
 
-export const adminLogin = async (req: FastifyRequest, reply: FastifyReply) => {
+import {
+  loginAdminService,
+  logoutAdminService,
+  refreshAdminTokenService,
+  adminMeService,
+} from "../services/admin.service";
+
+// LOGIN (access + refresh cookie)
+export const loginAdminController = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
   try {
-    const { email, password } = req.body as {
+    const { email, password } = request.body as {
       email: string;
       password: string;
     };
 
-    const admin = await Admin.findOne({ email });
+    const result = await loginAdminService(request.server, email, password);
 
-    if (!admin) {
-      return sendResponse(reply, 401, false, "Admin not found");
-    }
+    // set cookies
+    reply.setCookie("admin_access_token", result.accessToken, result.accessCookie);
+    reply.setCookie("admin_refresh_token", result.refreshToken, result.refreshCookie);
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-
-    if (!isMatch) {
-      return sendResponse(reply, 401, false, "Invalid password");
-    }
-
-    // ✅ create jwt token
-    const token = reply.server.jwt.sign(
-      { id: admin._id, email: admin.email, role: "admin" },
-      { expiresIn: "5h" }
+    return sendResponse(reply, 200, true, "Login success", result.admin);
+  } catch (err: any) {
+    return sendResponse(
+      reply,
+      err.statusCode || 500,
+      false,
+      err.message || "Login failed",
+      null
     );
-
-    // ✅ set cookie
-    reply.setCookie("admin_token", token, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 5, // 5 hours
-    });
-
-    return sendResponse(reply, 200, true, "Login success", {
-      id: admin._id,
-      email: admin.email,
-    });
-  } catch (err) {
-    return sendResponse(reply, 500, false, "Login failed");
   }
 };
 
-export const adminLogout = async (_req: FastifyRequest, reply: FastifyReply) => {
-  reply.clearCookie("admin_token", { path: "/" });
+// LOGOUT (clear both cookies)
+export const logoutAdminController = async (
+  _request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const result = logoutAdminService();
 
-  return sendResponse(reply, 200, true, "Logout success");
+    reply.clearCookie("admin_access_token", result.clearOptions);
+    reply.clearCookie("admin_refresh_token", result.clearOptions);
+
+    return sendResponse(reply, 200, true, "Logout success", null);
+  } catch (err: any) {
+    return sendResponse(reply, 500, false, "Logout failed", null);
+  }
+};
+
+// REFRESH (new access token from refresh token)
+export const refreshAdminTokenController = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const refreshToken = request.cookies.admin_refresh_token;
+
+    const result = await refreshAdminTokenService(request.server, refreshToken);
+
+    reply.setCookie("admin_access_token", result.accessToken, result.cookie);
+
+    return sendResponse(reply, 200, true, "Token refreshed", null);
+  } catch (err: any) {
+    return sendResponse(
+      reply,
+      err.statusCode || 401,
+      false,
+      err.message || "Refresh failed",
+      null
+    );
+  }
+};
+
+// SESSION STATUS CHECK
+export const adminMeController = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const accessToken = request.cookies.admin_access_token;
+
+    const admin = await adminMeService(request.server, accessToken);
+
+    return sendResponse(reply, 200, true, "Session active", admin);
+  } catch (err: any) {
+    return sendResponse(
+      reply,
+      err.statusCode || 401,
+      false,
+      err.message || "Session expired",
+      null
+    );
+  }
 };

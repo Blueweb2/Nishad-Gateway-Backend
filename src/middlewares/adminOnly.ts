@@ -1,29 +1,18 @@
-// admin guard middleware
 import { FastifyRequest, FastifyReply } from "fastify";
+import { sendResponse } from "../utils/response";
 
 export const adminOnly = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const user = req.user as any;
 
     if (!user) {
-      return reply.code(401).send({
-        success: false,
-        message: "Unauthorized",
-      });
+      return sendResponse(reply, 401, false, "Unauthorized", null);
     }
 
-    //  check role from JWT payload
     if (user.role !== "admin") {
-      return reply.code(403).send({
-        success: false,
-        message: "Access denied. Admin only.",
-      });
+      return sendResponse(reply, 403, false, "Access denied. Admin only.", null);
     }
   } catch (err) {
-    return reply.code(403).send({
-      success: false,
-      message: "Access denied",
-    });
+    return sendResponse(reply, 403, false, "Access denied", null);
   }
 };
-

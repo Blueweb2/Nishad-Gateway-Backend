@@ -8,16 +8,16 @@ import multipart from "@fastify/multipart";
 
 import fastifyStatic from "@fastify/static";
 import path from "path";
-import leadRoutes from "./routes/lead.routes";
+import { env } from "./config/env";
 
-export const buildApp = () => {
+export const buildApp = async () => {
   const app = Fastify({ logger: true });
 
-  //  1) cookie first
-  app.register(fastifyCookie);
+  // ✅ 1) cookie first
+  await app.register(fastifyCookie);
 
-  //  2) cors after cookie (credentials fix)
-  app.register(cors, {
+  // ✅ 2) cors after cookie
+  await app.register(cors, {
     origin: ["http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -25,24 +25,26 @@ export const buildApp = () => {
     preflightContinue: false,
   });
 
-  app.register(fastifyJwt, {
-    secret: process.env.JWT_SECRET || "fallback_secret",
+  // ✅ 3) jwt
+  await app.register(fastifyJwt, {
+    secret: env.JWT_SECRET,
   });
 
-  app.register(multipart, {
+  // ✅ 4) multipart
+  await app.register(multipart, {
     limits: {
       fileSize: 10 * 1024 * 1024,
     },
   });
 
-app.register(fastifyStatic, {
-  root: path.join(process.cwd(), "uploads"),
-  prefix: "/uploads/",
-});
+  // ✅ 5) static uploads
+  await app.register(fastifyStatic, {
+    root: path.join(process.cwd(), "uploads"),
+    prefix: "/uploads/",
+  });
 
-
-  app.register(routes, { prefix: "/api" });
-// app.register(leadRoutes, { prefix: "/api" });
+  // ✅ 6) routes
+  await app.register(routes, { prefix: "/api" });
 
   return app;
 };
