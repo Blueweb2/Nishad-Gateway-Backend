@@ -131,10 +131,12 @@ ownershipSlides: {
 
   faqs: { q: string; a: string }[];
 
+status?: "draft" | "published";
+publishedAt?: Date;
 
 
-  createdAt: Date;
-  updatedAt: Date;
+createdAt: Date;
+updatedAt: Date;
 }
 
 const SubServiceContentSchema = new Schema<ISubServiceContent>(
@@ -345,9 +347,7 @@ ownershipSlides: {
         image: { type: String, default: "" },
       },
     ],
-
     // FAQ
-
     faqHeading: { type: String, default: "Frequently Asked Questions" },
 
     faqs: [
@@ -356,9 +356,22 @@ ownershipSlides: {
         a: { type: String, default: "" },
       },
     ],
+
+    // ✅ BLOG META (NEW)
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "draft",
+    },
+
+    publishedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
+
 
 export const SubServiceContentModel = mongoose.model<ISubServiceContent>(
   "SubServiceContent",

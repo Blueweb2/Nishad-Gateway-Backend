@@ -13,10 +13,10 @@ import { env } from "./config/env";
 export const buildApp = async () => {
   const app = Fastify({ logger: true });
 
-  // ✅ 1) cookie first
+  //  1) cookie first
   await app.register(fastifyCookie);
 
-  // ✅ 2) cors after cookie
+  //  2) cors after cookie
   await app.register(cors, {
     origin: env.CLIENT_URL,
     credentials: true,
@@ -25,25 +25,25 @@ export const buildApp = async () => {
     preflightContinue: false,
   });
 
-  // ✅ 3) jwt
+  //  3) jwt
   await app.register(fastifyJwt, {
     secret: env.JWT_SECRET,
   });
 
-  // ✅ 4) multipart
+  //  4) multipart
   await app.register(multipart, {
     limits: {
       fileSize: 10 * 1024 * 1024,
     },
   });
 
-  // ✅ 5) static uploads
+  //  5) static uploads
   await app.register(fastifyStatic, {
     root: path.join(process.cwd(), "uploads"),
     prefix: "/uploads/",
   });
 
-  // ✅ 6) routes
+  //  6) routes
   await app.register(routes, { prefix: "/api" });
 
   return app;

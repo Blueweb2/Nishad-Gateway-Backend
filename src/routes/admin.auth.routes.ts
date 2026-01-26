@@ -10,7 +10,7 @@ const hashToken = (token: string) =>
     crypto.createHash("sha256").update(token).digest("hex");
 
 export default async function adminAuthRoutes(app: FastifyInstance) {
-    // ✅ LOGIN
+    //  LOGIN
     app.post("/admin/login", async (req, reply) => {
         const { email, password } = req.body as any;
 
@@ -35,7 +35,7 @@ export default async function adminAuthRoutes(app: FastifyInstance) {
         return reply.send({ accessToken });
     });
 
-    // ✅ REFRESH (Rotation)
+    //  REFRESH (Rotation)
     app.post("/admin/refresh", async (req, reply) => {
         const refreshToken = req.cookies.adminRefreshToken;
 
@@ -100,7 +100,7 @@ export default async function adminAuthRoutes(app: FastifyInstance) {
         }
     });
 
-    // ✅ LOGOUT
+    // LOGOUT
     app.post("/admin/logout", async (req, reply) => {
         const refreshToken = req.cookies.adminRefreshToken;
 
