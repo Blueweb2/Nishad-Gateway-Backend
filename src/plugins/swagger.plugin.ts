@@ -18,7 +18,7 @@ async function swaggerPlugin(app: FastifyInstance) {
     routePrefix: "/docs",
   });
 
-  app.log.info("✅ Swagger enabled at /docs");
+  app.log.info(" Swagger enabled at /docs");
 }
 
 export default fp(swaggerPlugin);

@@ -3,6 +3,7 @@ import { Admin } from "../models/Admin.model";
 import { createAdminTokens, getCookieOptions } from "./token.service";
 import { comparePassword } from "../utils/hash";
 import { createError } from "../utils/errors";
+import { CookieSerializeOptions } from "@fastify/cookie";
 
 export const loginAdminService = async (
   app: FastifyInstance,
@@ -33,14 +34,18 @@ export const loginAdminService = async (
 };
 
 export const logoutAdminService = () => {
-  return {
-    clearOptions: {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax" as const,
-      secure: process.env.NODE_ENV === "production",
-    },
-  };
+const isProd = process.env.NODE_ENV === "production";
+
+
+const clearOptions: CookieSerializeOptions = {
+path: "/",
+httpOnly: true,
+sameSite: "none", //  MUST match login cookies
+secure: false,
+};
+
+
+return { clearOptions };
 };
 
 export const refreshAdminTokenService = async (

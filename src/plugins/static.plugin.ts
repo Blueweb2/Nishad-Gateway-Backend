@@ -9,7 +9,7 @@ async function staticPlugin(app: FastifyInstance) {
     prefix: "/uploads/",
   });
 
-  app.log.info("✅ Static Files Plugin Registered (/uploads)");
+  app.log.info(" Static Files Plugin Registered (/uploads)");
 }
 
 export default fp(staticPlugin);

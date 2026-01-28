@@ -5,7 +5,7 @@ export interface ICity extends Document {
   citySlug: string;
   cityImage: string;
 
-  shortText: string;
+ 
   bestSuitedFor: string;
   focus: string;
 
@@ -31,7 +31,6 @@ const CitySchema = new Schema<ICity>(
 
     cityImage: { type: String, default: "" },
 
-    shortText: { type: String, default: "" },
     bestSuitedFor: { type: String, default: "" },
     focus: { type: String, default: "" },
 

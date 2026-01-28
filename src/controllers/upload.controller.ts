@@ -23,6 +23,8 @@ export const getSignedUpload = async (
     const allowedFolders = [
       "nishad-gateway/subservices",
       "nishad-gateway/blogs",
+      "nishad-gateway/cities",
+      "nishad-gateway/cities/hero",
     ];
 
     if (!allowedFolders.includes(cleanFolder)) {
