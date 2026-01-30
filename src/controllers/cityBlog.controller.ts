@@ -2,14 +2,18 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import mongoose from "mongoose";
 import { CityBlogService } from "../services/cityBlog.service";
 import { CityService } from "../services/city.service";
-import { CityBlogModel } from "../models/cityBlog.model";
+import {
+  IdRoute,
+  CitySlugRoute,
+  CityBlogUpsertRoute,
+} from "../types/fastify";
 
 export const CityBlogController = {
-  /* ======================================================
-     ADMIN – GET BLOG BY CITY ID
-  ====================================================== */
+
+  /* ================= GET BY CITY ID ================= */
+
   async getByCityId(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<IdRoute>,
     reply: FastifyReply
   ) {
     try {
@@ -35,30 +39,24 @@ export const CityBlogController = {
         sections: blog?.sections || [],
         status: blog?.status || "DRAFT",
       });
+
     } catch (err) {
       console.error("CityBlog getByCityId error:", err);
-      return reply
-        .code(500)
-        .send({ message: "Failed to load city blog" });
+      return reply.code(500).send({
+        message: "Failed to load city blog",
+      });
     }
   },
 
-  /* ======================================================
-     ADMIN – CREATE / UPDATE BLOG
-  ====================================================== */
+  /* ================= UPSERT ================= */
+
   async upsert(
-    req: FastifyRequest<{
-      Params: { id: string };
-      Body: {
-        sections: any[];
-        status?: "DRAFT" | "PUBLISHED";
-      };
-    }>,
+    req: FastifyRequest<CityBlogUpsertRoute>,
     reply: FastifyReply
   ) {
     try {
       const { id } = req.params;
-      const { sections, status } = req.body;
+      const { sections, status = "DRAFT" } = req.body;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return reply.code(400).send({ message: "Invalid city ID" });
@@ -69,33 +67,58 @@ export const CityBlogController = {
         return reply.code(404).send({ message: "City not found" });
       }
 
-      // 🚨 HERO ENFORCEMENT
-      const heroSections = sections.filter(
-        (s) => s.type === "HERO" && s.isActive
-      );
-
-      if (heroSections.length === 0) {
+      if (!Array.isArray(sections) || sections.length === 0) {
         return reply.code(400).send({
-          message: "Hero section is required",
+          message: "At least one section is required",
         });
       }
 
-      if (heroSections.length > 1) {
+      const orders = sections.map((s) => s.order);
+      if (orders.length !== new Set(orders).size) {
         return reply.code(400).send({
-          message: "Only one Hero section is allowed",
+          message: "Section order values must be unique",
         });
+      }
+
+      const heroSections = sections.filter((s) => s.type === "HERO");
+
+      if (heroSections.length !== 1) {
+        return reply.code(400).send({
+          message: "Exactly one HERO section is required",
+        });
+      }
+
+      if (status === "PUBLISHED") {
+        const activeSections = sections.filter((s) => s.isActive);
+
+        if (activeSections.length === 0) {
+          return reply.code(400).send({
+            message: "At least one active section is required to publish",
+          });
+        }
+
+        const activeHeroSections = activeSections.filter(
+          (s) => s.type === "HERO"
+        );
+
+        if (activeHeroSections.length !== 1) {
+          return reply.code(400).send({
+            message: "Exactly one active HERO section is required to publish",
+          });
+        }
       }
 
       const blog = await CityBlogService.upsert(
         id,
         sections,
-        status || "DRAFT"
+        status
       );
 
       return reply.code(200).send({
-        message: "City blog saved",
+        message: "City blog saved successfully",
         blog,
       });
+
     } catch (err) {
       console.error("CityBlog upsert error:", err);
       return reply.code(500).send({
@@ -104,20 +127,19 @@ export const CityBlogController = {
     }
   },
 
-  /* ======================================================
-     USER – GET BLOG BY CITY SLUG (PUBLIC)
-  ====================================================== */
+  /* ================= GET BY SLUG ================= */
+
   async getByCitySlug(
-    req: FastifyRequest<{ Params: { citySlug: string } }>,
+    req: FastifyRequest<CitySlugRoute>,
     reply: FastifyReply
   ) {
     try {
       const { citySlug } = req.params;
 
-      if (!citySlug || citySlug.trim().length === 0) {
-        return reply
-          .code(400)
-          .send({ message: "City slug is required" });
+      if (!citySlug?.trim()) {
+        return reply.code(400).send({
+          message: "City slug is required",
+        });
       }
 
       const data = await CityBlogService.getByCitySlug(citySlug);
@@ -129,11 +151,12 @@ export const CityBlogController = {
       }
 
       return reply.code(200).send(data);
+
     } catch (err) {
       console.error("CityBlog getByCitySlug error:", err);
-      return reply
-        .code(500)
-        .send({ message: "Failed to load city blog" });
+      return reply.code(500).send({
+        message: "Failed to load city blog",
+      });
     }
   },
 };

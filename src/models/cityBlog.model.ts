@@ -1,5 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+/* ======================================================
+   TYPES
+====================================================== */
+
 export interface ICitySection {
   type:
     | "HERO"
@@ -25,68 +29,72 @@ export interface ICitySection {
 export interface ICityBlog extends Document {
   cityId: mongoose.Types.ObjectId;
   sections: ICitySection[];
-   status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED";
   createdAt: Date;
   updatedAt: Date;
 }
 
-/* ---------- Section Schema ---------- */
-const CitySectionSchema = new Schema<ICitySection>(
-  {
-    type: {
-      type: String,
-      required: true,
-      enum: [
-  "HERO",
-  "CATEGORIES",
-  "INTRO_TEXT",
-  "FEATURE_CARDS",
-  "STATS",
-  "IMAGE_TEXT",
-  "BUSINESS",
-  "LIFESTYLE",
-  "STEPS",
-  "INFRASTRUCTURE",
-  "PLACES_GRID",
-  "FAQ",
-  "CTA",
-],
-    },
+/* ======================================================
+   SECTION SCHEMA
+====================================================== */
 
-    title: { type: String, default: "" },
-
-    content: {
-      type: Schema.Types.Mixed,
-      required: true,
-    },
-
-    order: {
-      type: Number,
-      default: 0,
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+const CitySectionSchema = new Schema<ICitySection>({
+  type: {
+    type: String,
+    required: true,
+    enum: [
+      "HERO",
+      "CATEGORIES",
+      "INTRO_TEXT",
+      "FEATURE_CARDS",
+      "STATS",
+      "IMAGE_TEXT",
+      "BUSINESS",
+      "LIFESTYLE",
+      "STEPS",
+      "INFRASTRUCTURE",
+      "PLACES_GRID",
+      "FAQ",
+      "CTA",
+    ],
   },
-  { _id: false }
-);
 
-/* ---------- City Blog Schema ---------- */
+  title: { type: String, default: "" },
+
+  content: {
+    type: Schema.Types.Mixed,
+    required: true,
+  },
+
+  order: {
+    type: Number,
+    default: 0,
+  },
+
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+/* ======================================================
+   CITY BLOG SCHEMA
+====================================================== */
+
 const CityBlogSchema = new Schema<ICityBlog>(
   {
     cityId: {
       type: Schema.Types.ObjectId,
       ref: "City",
       required: true,
-      unique: true,
+      unique: true, // One blog per city
     },
 
     sections: {
       type: [CitySectionSchema],
       default: [],
     },
+
     status: {
       type: String,
       enum: ["DRAFT", "PUBLISHED"],
@@ -95,6 +103,20 @@ const CityBlogSchema = new Schema<ICityBlog>(
   },
   { timestamps: true }
 );
+
+/* ======================================================
+   INDEXES
+====================================================== */
+
+// Optimize public queries
+CityBlogSchema.index({ status: 1 });
+
+// Useful if filtering by city + status
+CityBlogSchema.index({ cityId: 1, status: 1 });
+
+/* ======================================================
+   MODEL EXPORT
+====================================================== */
 
 export const CityBlogModel =
   mongoose.models.CityBlog ||

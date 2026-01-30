@@ -1,40 +1,69 @@
 import { FastifyInstance } from "fastify";
 import { CityController } from "../controllers/city.controller";
+
+import { auth } from "../middlewares/auth";
+import { adminOnly } from "../middlewares/adminOnly";
+import { IdRoute, CitySlugRoute } from "../types/fastify";
+
+
+
 import {
   createCitySchema,
   updateCitySchema,
+  getCityByIdSchema,
 } from "../schemas/city.schema";
 
 export default async function cityRoutes(app: FastifyInstance) {
 
-  /* ---------- PUBLIC ---------- */
+  /* ================= PUBLIC ================= */
 
   app.get("/cities", CityController.getAll);
 
-  // Slug-based (public)
-  app.get("/cities/slug/:citySlug", CityController.getBySlug);
+  app.get(
+    "/cities/slug/:citySlug",
+    CityController.getBySlug
+  );
 
-  /* ---------- ADMIN ---------- */
+  /* ================= ADMIN ================= */
 
   app.post(
     "/cities",
-    { schema: createCitySchema },
+    {
+      preHandler: [auth, adminOnly],
+      schema: createCitySchema,
+    },
     CityController.create
   );
 
-  app.get(
-    "/cities/id/:id",
-    CityController.getById
-  );
+app.get<CitySlugRoute>(
+  "/cities/slug/:citySlug",
+  CityController.getBySlug
+);
 
-  app.put(
-    "/cities/id/:id",
-    { schema: updateCitySchema },
-    CityController.update
-  );
+app.get<IdRoute>(
+  "/cities/id/:id",
+  {
+    preHandler: [auth, adminOnly],
+    schema: getCityByIdSchema,
+  },
+  CityController.getById
+);
 
-  app.delete(
-    "/cities/id/:id",
-    CityController.remove
-  );
+app.put<IdRoute>(
+  "/cities/id/:id",
+  {
+    preHandler: [auth, adminOnly],
+    schema: updateCitySchema,
+  },
+  CityController.update
+);
+
+app.delete<IdRoute>(
+  "/cities/id/:id",
+  {
+    preHandler: [auth, adminOnly],
+    schema: getCityByIdSchema,
+  },
+  CityController.remove
+);
 }

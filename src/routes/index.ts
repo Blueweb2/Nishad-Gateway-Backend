@@ -9,6 +9,8 @@ import uploadRoutes from "./upload.routes";
 import leadRoutes from "./lead.routes";
 import cityRoutes from "./city.routes";
 import cityBlogRoutes from "./cityBlog.routes";
+import cityCategoryRoutes from "./cityCategory.routes";
+
 
 export default async function routes(app: FastifyInstance) {
   // Auth/Admin
@@ -25,6 +27,7 @@ export default async function routes(app: FastifyInstance) {
 
   app.register(cityRoutes);
   app.register(cityBlogRoutes);
+    app.register(cityCategoryRoutes)
 
 
  app.register(uploadRoutes, { prefix: "/upload" });

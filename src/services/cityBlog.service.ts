@@ -2,46 +2,41 @@ import mongoose from "mongoose";
 import { CityBlogModel } from "../models/cityBlog.model";
 import { CityModel } from "../models/City.model";
 
-export const CityService = {
-  async createCity(data: any) {
-    // 1️⃣ Create city
-    const city = await CityModel.create(data);
-
-    // 2️⃣ Auto-create empty blog
-    await CityBlogModel.create({
-      cityId: city._id,
-      sections: [],
-      status: "DRAFT",
-    });
-
-    return city;
-  },
-};
-
 export const CityBlogService = {
   /* ======================================================
      ADMIN – GET BLOG BY CITY ID
   ====================================================== */
   async getByCityId(cityId: string) {
+    if (!mongoose.Types.ObjectId.isValid(cityId)) {
+      return null;
+    }
+
     return CityBlogModel.findOne({
       cityId: new mongoose.Types.ObjectId(cityId),
     }).lean();
   },
 
   /* ======================================================
-     ADMIN – UPSERT BLOG BY CITY ID
+     ADMIN – CREATE / UPDATE BLOG (UPSERT)
   ====================================================== */
   async upsert(
     cityId: string,
     sections: any[],
     status: "DRAFT" | "PUBLISHED" = "DRAFT"
   ) {
+    if (!mongoose.Types.ObjectId.isValid(cityId)) {
+      throw new Error("Invalid cityId");
+    }
+
+    const objectCityId = new mongoose.Types.ObjectId(cityId);
+
     return CityBlogModel.findOneAndUpdate(
-      { cityId: new mongoose.Types.ObjectId(cityId) },
+      { cityId: objectCityId },
       {
-        cityId: new mongoose.Types.ObjectId(cityId),
-        sections,
-        status,
+        $set: {
+          sections,
+          status,
+        },
       },
       {
         upsert: true,
@@ -53,9 +48,18 @@ export const CityBlogService = {
 
   /* ======================================================
      USER – GET BLOG BY CITY SLUG (PUBLIC)
+     Only returns:
+     - Active city
+     - Published blog
+     - Active sections
+     - Sorted by order
   ====================================================== */
   async getByCitySlug(citySlug: string) {
-    // 1️⃣ Find city by slug
+    if (!citySlug || citySlug.trim().length === 0) {
+      return null;
+    }
+
+    // 1️⃣ Find active city
     const city = await CityModel.findOne({
       citySlug,
       isActive: true,
@@ -63,7 +67,7 @@ export const CityBlogService = {
 
     if (!city) return null;
 
-    // 2️⃣ Find ONLY PUBLISHED blog
+    // 2️⃣ Find published blog
     const blog = await CityBlogModel.findOne({
       cityId: city._id,
       status: "PUBLISHED",
@@ -71,10 +75,14 @@ export const CityBlogService = {
 
     if (!blog) return null;
 
-    // 3️⃣ Return combined response
+    // 3️⃣ Filter only active sections and sort by order
+    const filteredSections = (blog.sections || [])
+      .filter((section: any) => section.isActive)
+      .sort((a: any, b: any) => a.order - b.order);
+
     return {
       city,
-      sections: blog.sections || [],
+      sections: filteredSections,
     };
   },
 };

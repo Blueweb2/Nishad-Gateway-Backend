@@ -7,33 +7,43 @@ export const cityBaseSchema = {
     minLength: 2,
     maxLength: 100,
   },
+
   citySlug: {
     type: "string",
     minLength: 2,
     maxLength: 100,
     pattern: "^[a-z0-9-]+$",
   },
+
   cityImage: {
-    type: "string",
-    default: "",
+    anyOf: [
+      { type: "string", format: "uri" },
+      { type: "string", maxLength: 0 }
+    ],
   },
+
   bestSuitedFor: {
     type: "string",
-    default: "",
+    maxLength: 300,
   },
+
   focus: {
     type: "string",
-    default: "",
+    maxLength: 300,
   },
+
   tag: {
     type: "string",
+    enum: ["ARTICLE", "FEATURED", "TRENDING"],
     default: "ARTICLE",
   },
+
   order: {
-    type: "number",
+    type: "integer",   // better
     minimum: 0,
     default: 0,
   },
+
   isActive: {
     type: "boolean",
     default: true,
@@ -51,6 +61,7 @@ export const createCitySchema = {
   },
 };
 
+
 // schemas/city.update.schema.ts
 
 
@@ -62,10 +73,35 @@ export const updateCitySchema = {
       id: { type: "string", minLength: 24, maxLength: 24 },
     },
   },
+
   body: {
     type: "object",
     additionalProperties: false,
     properties: cityBaseSchema,
-    minProperties: 1, // 👈 IMPORTANT
+    minProperties: 1,
+  },
+};
+
+// Add Index Validation Schema for GET by ID
+
+export const cityIdParamSchema = {
+  params: {
+    type: "object",
+    required: ["id"],
+    properties: {
+      id: { type: "string", minLength: 24, maxLength: 24 },
+    },
+  },
+};
+
+
+
+export const getCityByIdSchema = {
+  params: {
+    type: "object",
+    required: ["id"],
+    properties: {
+      id: { type: "string", minLength: 24, maxLength: 24 },
+    },
   },
 };
