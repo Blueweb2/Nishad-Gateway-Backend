@@ -41,7 +41,7 @@ const clearOptions: CookieSerializeOptions = {
 path: "/",
 httpOnly: true,
 sameSite: "none", //  MUST match login cookies
-secure: false,
+secure: true,
 };
 
 
