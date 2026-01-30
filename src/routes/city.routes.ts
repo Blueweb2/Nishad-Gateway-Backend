@@ -19,10 +19,7 @@ export default async function cityRoutes(app: FastifyInstance) {
 
   app.get("/cities", CityController.getAll);
 
-  app.get(
-    "/cities/slug/:citySlug",
-    CityController.getBySlug
-  );
+
 
   /* ================= ADMIN ================= */
 
