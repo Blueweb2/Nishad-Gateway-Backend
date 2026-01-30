@@ -60,8 +60,8 @@ export interface ISubServiceContent extends Document {
   entityChooseSubheading: string;
   entityChooseQuestions: {
     question: string;
-    options: { label: string; value: string }[];
-    selectedValue?: string;
+    knowMoreLabel?: string;
+knowMoreUrl?: string;
   }[];
 
 
@@ -81,27 +81,23 @@ ownershipSlides: {
 
 
 
-  // DOCUMENTS SECTION
+ // ✅ DOCUMENTS REQUIRED (FINAL)
+documentsHeading: string;
+documentsSubheading: string;
 
+documentEntityTabs: {
+  label: string;   // LLC, Branch, RHQ...
+  value: string;   // llc, branch, rhq...
+}[];
 
-
-  documentsHeading: string;
-  documentsSubheading: string;
-
-  documentEntityTabs: {
-    label: string; // LLC, Branch, RHQ...
-    value: string; // llc, branch...
+documentGroups: {
+  entityValue: string;
+  cards: {
+    title: string;
+    items: string[];
+    icon?: string;
   }[];
-
-  documentGroups: {
-    entityValue: string; // link to tab value
-    cards: {
-      title: string; // Individual Shareholder
-      items: string[]; // Passport copy, etc
-      icon?: string; // optional
-    }[];
-  }[];
-
+}[];
 
   //  LOCATIONS SLIDER
   locationsHeading: string;
@@ -245,21 +241,28 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
 
     // ENTITY CHOOSE SECTION
 
+//  ENTITY CHOOSE SECTION (UPDATED)
+entityChooseHeading: { type: String, default: "" },
+entityChooseSubheading: { type: String, default: "" },
 
-    entityChooseHeading: { type: String, default: "" },
-    entityChooseSubheading: { type: String, default: "" },
-    entityChooseQuestions: [
-      {
-        question: { type: String, default: "" },
-        options: [
-          {
-            label: { type: String, default: "" },
-            value: { type: String, default: "" },
-          },
-        ],
-        selectedValue: { type: String, default: "" },
+entityChooseQuestions: {
+  type: [
+    {
+      question: { type: String, default: "" },
+
+      knowMoreLabel: {
+        type: String,
+        default: "Know more",
       },
-    ],
+
+      knowMoreUrl: {
+        type: String,
+        default: "",
+      },
+    },
+  ],
+  default: [],
+},
 
 
 // OWNERSHIP SLIDER
@@ -285,34 +288,55 @@ ownershipSlides: {
 
 
 
-    documentsHeading: { type: String, default: "" },
-    documentsSubheading: { type: String, default: "" },
+    // DOCUMENTS REQUIRED SECTION
 
-    documentEntityTabs: {
-      type: [
-        {
-          label: { type: String, default: "" },
-          value: { type: String, default: "" },
-        },
-      ],
-      default: [],
+// DOCUMENTS REQUIRED SECTION
+
+documentsHeading: { type: String, default: "" },
+documentsSubheading: { type: String, default: "" },
+
+documentEntityTabs: {
+  type: [
+    {
+      label: { type: String, default: "" },
+      value: { type: String, required: true },
     },
+  ],
+  default: [],
+},
 
-    documentGroups: {
-      type: [
-        {
-          entityValue: { type: String, default: "" },
-          cards: [
-            {
-              title: { type: String, default: "" },
-              items: { type: [String], default: [] },
-              icon: { type: String, default: "" },
+documentGroups: {
+  type: [
+    {
+      entityValue: {
+        type: String,
+        required: true,
+      },
+      cards: {
+        type: [
+          {
+            title: {
+              type: String,
+              default: "",
             },
-          ],
-        },
-      ],
-      default: [],
+            items: {
+              type: [String],
+              default: [],
+            },
+            icon: {
+              type: String,
+              default: "",
+            },
+          },
+        ],
+        default: [],
+      },
     },
+  ],
+  default: [],
+},
+// RIGHT SIDE CONTENT (Cards per entity)
+
 
 
 

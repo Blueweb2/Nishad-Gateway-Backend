@@ -3,9 +3,16 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ICitySection {
   type:
     | "HERO"
-    | "INTRO"
+    | "CATEGORIES"
+    | "INTRO_TEXT"
+    | "FEATURE_CARDS"
+    | "STATS"
+    | "IMAGE_TEXT"
     | "BUSINESS"
     | "LIFESTYLE"
+    | "STEPS"
+    | "INFRASTRUCTURE"
+    | "PLACES_GRID"
     | "FAQ"
     | "CTA";
 
@@ -18,6 +25,7 @@ export interface ICitySection {
 export interface ICityBlog extends Document {
   cityId: mongoose.Types.ObjectId;
   sections: ICitySection[];
+   status: "DRAFT" | "PUBLISHED";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,7 +36,21 @@ const CitySectionSchema = new Schema<ICitySection>(
     type: {
       type: String,
       required: true,
-      enum: ["HERO", "INTRO", "BUSINESS", "LIFESTYLE", "FAQ", "CTA"],
+      enum: [
+  "HERO",
+  "CATEGORIES",
+  "INTRO_TEXT",
+  "FEATURE_CARDS",
+  "STATS",
+  "IMAGE_TEXT",
+  "BUSINESS",
+  "LIFESTYLE",
+  "STEPS",
+  "INFRASTRUCTURE",
+  "PLACES_GRID",
+  "FAQ",
+  "CTA",
+],
     },
 
     title: { type: String, default: "" },
@@ -64,6 +86,11 @@ const CityBlogSchema = new Schema<ICityBlog>(
     sections: {
       type: [CitySectionSchema],
       default: [],
+    },
+    status: {
+      type: String,
+      enum: ["DRAFT", "PUBLISHED"],
+      default: "DRAFT",
     },
   },
   { timestamps: true }
