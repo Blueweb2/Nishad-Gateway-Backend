@@ -48,11 +48,13 @@ export interface ISubServiceContent extends Document {
   // ✅ ENTITY TYPES SLIDER 
   entityTypesHeading: string;
   entityTypesDescription: string;
-  entityTypesSlides: {
-    title: string;
-    image: string;
-    description?: string;
-  }[];
+ entityTypesSlides: {
+  title: string;
+  description?: string;
+  mainImage: string;
+  subImage: string;
+}[];
+
 
   // ENTITY CHOOSE SECTION
 
@@ -81,7 +83,7 @@ ownershipSlides: {
 
 
 
- // ✅ DOCUMENTS REQUIRED (FINAL)
+ // DOCUMENTS REQUIRED (FINAL)
 documentsHeading: string;
 documentsSubheading: string;
 
@@ -99,16 +101,7 @@ documentGroups: {
   }[];
 }[];
 
-  //  LOCATIONS SLIDER
-  locationsHeading: string;
-  locationsSubheading: string;
-  locationsSlides: {
-    title: string;
-    description: string;
-    image: string;
-    tag?: string; // ex: ARTICLE
-    link?: string; // optional click
-  }[];
+
 
 
   // INTRO
@@ -123,9 +116,12 @@ documentGroups: {
   }[];
 
   // FAQ
-  faqHeading: string;
+// FAQ
+faqHeading: string;
+faqImage?: string;
+faqCtaText?: string;
+faqs: { q: string; a: string }[];
 
-  faqs: { q: string; a: string }[];
 
 status?: "draft" | "published";
 publishedAt?: Date;
@@ -154,7 +150,6 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
         "ownership",
         "entityChoose",
         "documents",
-        "locations",
         "faq",
       ],
     },
@@ -228,15 +223,17 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     entityTypesHeading: { type: String, default: "" },
     entityTypesDescription: { type: String, default: "" },
 
-    entityTypesSlides: [
-  {
-    title: { type: String, default: "" },
-    description: { type: String, default: "" },
-
-    mainImage: { type: String, default: "" },
-    subImage: { type: String, default: "" },
-  },
-],
+entityTypesSlides: {
+  type: [
+    {
+      title: { type: String, default: "" },
+      description: { type: String, default: "" },
+      mainImage: { type: String, default: "" },
+      subImage: { type: String, default: "" },
+    },
+  ],
+  default: [],
+},
 
 
     // ENTITY CHOOSE SECTION
@@ -340,25 +337,6 @@ documentGroups: {
 
 
 
-    // ✅ LOCATIONS SLIDER
-    locationsHeading: { type: String, default: "" },
-    locationsSubheading: { type: String, default: "" },
-
-    locationsSlides: {
-      type: [
-        {
-          title: { type: String, default: "" },
-          description: { type: String, default: "" },
-          image: { type: String, default: "" },
-          tag: { type: String, default: "ARTICLE" },
-          link: { type: String, default: "" },
-        },
-      ],
-      default: [],
-    },
-
-
-
     // INTRO
     introHeading: { type: String, default: "" },
     introText: { type: String, default: "" },
@@ -372,14 +350,32 @@ documentGroups: {
       },
     ],
     // FAQ
-    faqHeading: { type: String, default: "Frequently Asked Questions" },
+  // FAQ
+faqHeading: {
+  type: String,
+  default: "Frequently Asked Questions",
+},
 
-    faqs: [
-      {
-        q: { type: String, default: "" },
-        a: { type: String, default: "" },
-      },
-    ],
+faqImage: {
+  type: String,
+  default: "",
+},
+
+faqCtaText: {
+  type: String,
+  default: "",
+},
+
+faqs: {
+  type: [
+    {
+      q: { type: String, default: "" },
+      a: { type: String, default: "" },
+    },
+  ],
+  default: [],
+},
+
 
     // ✅ BLOG META (NEW)
     status: {
