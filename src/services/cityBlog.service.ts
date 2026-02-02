@@ -3,9 +3,9 @@ import { CityBlogModel } from "../models/cityBlog.model";
 import { CityModel } from "../models/City.model";
 
 export const CityBlogService = {
-  /* ======================================================
-     ADMIN – GET BLOG BY CITY ID
-  ====================================================== */
+
+  /* ================= ADMIN – GET BLOG ================= */
+
   async getByCityId(cityId: string) {
     if (!mongoose.Types.ObjectId.isValid(cityId)) {
       return null;
@@ -16,13 +16,12 @@ export const CityBlogService = {
     }).lean();
   },
 
-  /* ======================================================
-     ADMIN – CREATE / UPDATE BLOG (UPSERT)
-  ====================================================== */
+  /* ================= ADMIN – UPSERT ================= */
+
   async upsert(
     cityId: string,
-    sections: any[],
-    status: "DRAFT" | "PUBLISHED" = "DRAFT"
+    sections?: any[],
+    status?: "DRAFT" | "PUBLISHED"
   ) {
     if (!mongoose.Types.ObjectId.isValid(cityId)) {
       throw new Error("Invalid cityId");
@@ -30,14 +29,19 @@ export const CityBlogService = {
 
     const objectCityId = new mongoose.Types.ObjectId(cityId);
 
+    const updateData: any = {};
+
+    if (sections !== undefined) {
+      updateData.sections = sections;
+    }
+
+    if (status !== undefined) {
+      updateData.status = status;
+    }
+
     return CityBlogModel.findOneAndUpdate(
       { cityId: objectCityId },
-      {
-        $set: {
-          sections,
-          status,
-        },
-      },
+      { $set: updateData },
       {
         upsert: true,
         new: true,
@@ -46,43 +50,33 @@ export const CityBlogService = {
     ).lean();
   },
 
-  /* ======================================================
-     USER – GET BLOG BY CITY SLUG (PUBLIC)
-     Only returns:
-     - Active city
-     - Published blog
-     - Active sections
-     - Sorted by order
-  ====================================================== */
-  async getByCitySlug(citySlug: string) {
-    if (!citySlug || citySlug.trim().length === 0) {
-      return null;
-    }
+  /* ================= PUBLIC – GET BY SLUG ================= */
 
-    // 1️⃣ Find active city
-    const city = await CityModel.findOne({
-      citySlug,
-      isActive: true,
-    }).lean();
+async getByCitySlug(citySlug: string) {
+  console.log("Incoming slug:", citySlug);
 
-    if (!city) return null;
+  const city = await CityModel.findOne({
+    citySlug,
+    isActive: true,
+  }).lean();
 
-    // 2️⃣ Find published blog
-    const blog = await CityBlogModel.findOne({
-      cityId: city._id,
-      status: "PUBLISHED",
-    }).lean();
+  console.log("City found:", city);
 
-    if (!blog) return null;
+  if (!city) return null;
 
-    // 3️⃣ Filter only active sections and sort by order
-    const filteredSections = (blog.sections || [])
-      .filter((section: any) => section.isActive)
-      .sort((a: any, b: any) => a.order - b.order);
+  const blog = await CityBlogModel.findOne({
+    cityId: city._id,
+    status: "PUBLISHED",
+  }).lean();
 
-    return {
-      city,
-      sections: filteredSections,
-    };
-  },
+  console.log("Blog found:", blog);
+
+  if (!blog) return null;
+
+  return {
+    city,
+    sections: blog.sections,
+  };
+}
+
 };

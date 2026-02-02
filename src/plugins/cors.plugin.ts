@@ -11,7 +11,7 @@ async function corsPlugin(app: FastifyInstance) {
     preflightContinue: false,
   });
 
-  app.log.info("✅ CORS Plugin Registered");
+  app.log.info(" CORS Plugin Registered");
 }
 
 export default fp(corsPlugin);

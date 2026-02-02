@@ -1,7 +1,14 @@
+import { idParamSchema } from "./common.params";
+
+/* ======================================================
+   SECTION SCHEMA
+====================================================== */
+
 export const citySectionSchema = {
   type: "object",
-  required: ["type", "content"],
+  required: ["type", "content", "order"],
   additionalProperties: false,
+
   properties: {
     type: {
       type: "string",
@@ -33,10 +40,35 @@ export const citySectionSchema = {
 
     isActive: {
       type: "boolean",
+      default: true,
     },
   },
 
   allOf: [
+    /* ================= HERO ================= */
+    {
+      if: {
+        properties: { type: { const: "HERO" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["heading", "subheading", "backgroundImage"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+              subheading: { type: "string" },
+              backgroundImage: { type: "string" },
+              ctaText: { type: "string" },
+              ctaLink: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+
+    /* ================= CATEGORIES ================= */
     {
       if: {
         properties: { type: { const: "CATEGORIES" } },
@@ -46,12 +78,14 @@ export const citySectionSchema = {
           content: {
             type: "object",
             required: ["categories", "introText"],
+            additionalProperties: false,
             properties: {
               categories: {
                 type: "array",
                 items: {
                   type: "object",
                   required: ["label", "link"],
+                  additionalProperties: false,
                   properties: {
                     label: { type: "string" },
                     link: { type: "string" },
@@ -67,19 +101,22 @@ export const citySectionSchema = {
   ],
 };
 
+/* ======================================================
+   UPDATE BLOG (UPSERT)
+   Allows:
+   - sections only
+   - status only
+   - both
+====================================================== */
+
 export const updateCityBlogSchema = {
-  params: {
-    type: "object",
-    required: ["id"],
-    properties: {
-      id: { type: "string", minLength: 24, maxLength: 24 },
-    },
-  },
+  params: idParamSchema,
 
   body: {
     type: "object",
-    required: ["sections"],
     additionalProperties: false,
+    minProperties: 1,
+
     properties: {
       sections: {
         type: "array",
@@ -95,22 +132,9 @@ export const updateCityBlogSchema = {
   },
 };
 
-
-/* =========================================
-   PARAM VALIDATION
-========================================= */
-
-export const cityIdParamSchema = {
-  type: "object",
-  required: ["id"],
-  properties: {
-    id: {
-      type: "string",
-      minLength: 24,
-      maxLength: 24,
-    },
-  },
-};
+/* ======================================================
+   SLUG PARAM (PUBLIC)
+====================================================== */
 
 export const citySlugParamSchema = {
   type: "object",

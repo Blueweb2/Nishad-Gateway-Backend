@@ -1,14 +1,11 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 import crypto from "crypto";
 
-
 export interface ISubServiceContent extends Document {
   subServiceId: Types.ObjectId;
 
   sectionOrder: string[];
 
-
-  // HERO
   heroTitle: string;
   heroSubtitle: string;
   heroDescription: string;
@@ -16,7 +13,6 @@ export interface ISubServiceContent extends Document {
   heroButtonLink: string;
   heroImage: string;
 
-  // WHY SECTION (Slider)
   whyHeading: string;
   whySlides: {
     title: string;
@@ -26,13 +22,12 @@ export interface ISubServiceContent extends Document {
   whyCtaText: string;
   whyCtaLink: string;
 
-// table of contents
   entityTableHeading: string;
-  entityTableColumns: {
-  key: string;
-  label: string;
-}[];
 
+  entityTableColumns: {
+    key: string;
+    label: string;
+  }[];
 
   entityTableRows: {
     id: string;
@@ -45,90 +40,67 @@ export interface ISubServiceContent extends Document {
     icon?: string;
   }[];
 
-  // ✅ ENTITY TYPES SLIDER 
   entityTypesHeading: string;
   entityTypesDescription: string;
- entityTypesSlides: {
-  title: string;
-  description?: string;
-  mainImage: string;
-  subImage: string;
-}[];
-
-
-  // ENTITY CHOOSE SECTION
+  entityTypesSlides: {
+    title: string;
+    description?: string;
+    mainImage: string;
+    subImage: string;
+  }[];
 
   entityChooseHeading: string;
   entityChooseSubheading: string;
   entityChooseQuestions: {
     question: string;
     knowMoreLabel?: string;
-knowMoreUrl?: string;
+    knowMoreUrl?: string;
   }[];
 
-
-// OWNERSHIP SLIDER
-ownershipHeading: string;
-
-// ✅ NEW
-ownershipTabOneLabel?: string;
-ownershipTabTwoLabel?: string;
-
-ownershipSlides: {
-  title: string;       // capsule text
-  leftText?: string;   // left text
-  rightText?: string;  // right text
-  image: string;
-}[];
-
-
-
- // DOCUMENTS REQUIRED (FINAL)
-documentsHeading: string;
-documentsSubheading: string;
-
-documentEntityTabs: {
-  label: string;   // LLC, Branch, RHQ...
-  value: string;   // llc, branch, rhq...
-}[];
-
-documentGroups: {
-  entityValue: string;
-  cards: {
+  ownershipHeading: string;
+  ownershipTabOneLabel?: string;
+  ownershipTabTwoLabel?: string;
+  ownershipSlides: {
     title: string;
-    items: string[];
-    icon?: string;
+    leftText?: string;
+    rightText?: string;
+    image: string;
   }[];
-}[];
 
+  documentsHeading: string;
+  documentsSubheading: string;
+  documentEntityTabs: {
+    label: string;
+    value: string;
+  }[];
+  documentGroups: {
+    entityValue: string;
+    cards: {
+      title: string;
+      items: string[];
+      icon?: string;
+    }[];
+  }[];
 
-
-
-  // INTRO
   introHeading: string;
   introText: string;
 
-  // SECTIONS
   sections: {
     heading: string;
     text: string;
     image?: string;
   }[];
 
-  // FAQ
-// FAQ
-faqHeading: string;
-faqImage?: string;
-faqCtaText?: string;
-faqs: { q: string; a: string }[];
+  faqHeading: string;
+  faqImage?: string;
+  faqCtaText?: string;
+  faqs: { q: string; a: string }[];
 
+  status?: "draft" | "published";
+  publishedAt?: Date;
 
-status?: "draft" | "published";
-publishedAt?: Date;
-
-
-createdAt: Date;
-updatedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const SubServiceContentSchema = new Schema<ISubServiceContent>(
@@ -154,8 +126,8 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       ],
     },
 
+    /* ================= HERO ================= */
 
-    // HERO
     heroTitle: { type: String, default: "" },
     heroSubtitle: { type: String, default: "" },
     heroDescription: { type: String, default: "" },
@@ -163,7 +135,8 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     heroButtonLink: { type: String, default: "" },
     heroImage: { type: String, default: "" },
 
-    // WHY SECTION (Slider)
+    /* ================= WHY ================= */
+
     whyHeading: { type: String, default: "" },
 
     whySlides: {
@@ -177,207 +150,146 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       default: [],
     },
 
-
     whyCtaText: { type: String, default: "" },
     whyCtaLink: { type: String, default: "" },
 
-
-
+    /* ================= ENTITY TABLE ================= */
 
     entityTableHeading: { type: String, default: "" },
 
     entityTableColumns: {
-  type: [
-    {
-      key: { type: String, default: "" },
-      label: { type: String, default: "" },
+      type: [
+        {
+          key: {
+            type: String,
+            required: true,   // ✅ key must exist
+            trim: true,
+          },
+          label: {
+            type: String,
+            required: true,   // ✅ label must exist
+            trim: true,
+          },
+        },
+      ],
+      default: [
+        { key: "entityType", label: "Entity Type" },
+        { key: "ownership", label: "Ownership" },
+        { key: "bestFor", label: "Best For" },
+        { key: "capital", label: "Capital" },
+        { key: "regulatoryBody", label: "Regulatory Body" },
+        { key: "timeToSetup", label: "Time to Setup" },
+      ],
     },
-  ],
-  default: [
-    { key: "entityType", label: "Entity Type" },
-    { key: "ownership", label: "Ownership" },
-    { key: "bestFor", label: "Best For" },
-    { key: "capital", label: "Capital" },
-    { key: "regulatoryBody", label: "Regulatory Body" },
-    { key: "timeToSetup", label: "Time to Setup" },
-  ],
-},
 
+    // ✅ FIXED — No auto default row
+    entityTableRows: {
+      type: [
+        {
+          id: {
+            type: String,
+            default: () => crypto.randomUUID(),
+          },
+          entityType: { type: String, default: "" },
+          ownership: { type: String, default: "" },
+          bestFor: { type: String, default: "" },
+          capital: { type: String, default: "" },
+          regulatoryBody: { type: String, default: "" },
+          timeToSetup: { type: String, default: "" },
+          icon: { type: String, default: "" },
+        },
+      ],
+      default: [],   // ✅ Important fix
+    },
 
-    entityTableRows: [
-      {
-        id: { type: String, default: () => crypto.randomUUID() },
-        entityType: { type: String, default: "" },
-        ownership: { type: String, default: "" },
-        bestFor: { type: String, default: "" },
-        capital: { type: String, default: "" },
-        regulatoryBody: { type: String, default: "" },
-        timeToSetup: { type: String, default: "" },
-        icon: { type: String, default: "" }, // optional
-      },
-    ],
+    /* ================= ENTITY TYPES ================= */
 
-
-
-    // ✅ ENTITY TYPES SLIDER (NEW)
     entityTypesHeading: { type: String, default: "" },
     entityTypesDescription: { type: String, default: "" },
 
-entityTypesSlides: {
-  type: [
-    {
-      title: { type: String, default: "" },
-      description: { type: String, default: "" },
-      mainImage: { type: String, default: "" },
-      subImage: { type: String, default: "" },
+    entityTypesSlides: {
+      type: [
+        {
+          title: { type: String, default: "" },
+          description: { type: String, default: "" },
+          mainImage: { type: String, default: "" },
+          subImage: { type: String, default: "" },
+        },
+      ],
+      default: [],
     },
-  ],
-  default: [],
-},
 
+    /* ================= OWNERSHIP ================= */
 
-    // ENTITY CHOOSE SECTION
+    ownershipHeading: { type: String, default: "" },
+    ownershipTabOneLabel: { type: String, default: "" },
+    ownershipTabTwoLabel: { type: String, default: "" },
 
-//  ENTITY CHOOSE SECTION (UPDATED)
-entityChooseHeading: { type: String, default: "" },
-entityChooseSubheading: { type: String, default: "" },
-
-entityChooseQuestions: {
-  type: [
-    {
-      question: { type: String, default: "" },
-
-      knowMoreLabel: {
-        type: String,
-        default: "Know more",
-      },
-
-      knowMoreUrl: {
-        type: String,
-        default: "",
-      },
+    ownershipSlides: {
+      type: [
+        {
+          title: { type: String, default: "" },
+          leftText: { type: String, default: "" },
+          rightText: { type: String, default: "" },
+          image: { type: String, default: "" },
+        },
+      ],
+      default: [],
     },
-  ],
-  default: [],
-},
 
+    /* ================= DOCUMENTS ================= */
 
-// OWNERSHIP SLIDER
-ownershipHeading: { type: String, default: "" },
+    documentsHeading: { type: String, default: "" },
+    documentsSubheading: { type: String, default: "" },
 
-//  NEW TAB LABELS
-ownershipTabOneLabel: { type: String, default: "" },
-ownershipTabTwoLabel: { type: String, default: "" },
-
-//  UPDATED SLIDES
-ownershipSlides: {
-  type: [
-    {
-      title: { type: String, default: "" },
-      leftText: { type: String, default: "" },
-      rightText: { type: String, default: "" },
-      image: { type: String, default: "" },
+    documentEntityTabs: {
+      type: [
+        {
+          label: { type: String, default: "" },
+          value: { type: String, required: true },
+        },
+      ],
+      default: [],
     },
-  ],
-  default: [],
-},
 
-
-
-
-    // DOCUMENTS REQUIRED SECTION
-
-// DOCUMENTS REQUIRED SECTION
-
-documentsHeading: { type: String, default: "" },
-documentsSubheading: { type: String, default: "" },
-
-documentEntityTabs: {
-  type: [
-    {
-      label: { type: String, default: "" },
-      value: { type: String, required: true },
-    },
-  ],
-  default: [],
-},
-
-documentGroups: {
-  type: [
-    {
-      entityValue: {
-        type: String,
-        required: true,
-      },
-      cards: {
-        type: [
-          {
-            title: {
-              type: String,
-              default: "",
-            },
-            items: {
-              type: [String],
-              default: [],
-            },
-            icon: {
-              type: String,
-              default: "",
-            },
+    documentGroups: {
+      type: [
+        {
+          entityValue: { type: String, required: true },
+          cards: {
+            type: [
+              {
+                title: { type: String, default: "" },
+                items: { type: [String], default: [] },
+                icon: { type: String, default: "" },
+              },
+            ],
+            default: [],
           },
-        ],
-        default: [],
-      },
+        },
+      ],
+      default: [],
     },
-  ],
-  default: [],
-},
-// RIGHT SIDE CONTENT (Cards per entity)
 
+    /* ================= FAQ ================= */
 
-
-
-    // INTRO
-    introHeading: { type: String, default: "" },
-    introText: { type: String, default: "" },
-
-    // SECTIONS
-    sections: [
-      {
-        heading: { type: String, default: "" },
-        text: { type: String, default: "" },
-        image: { type: String, default: "" },
-      },
-    ],
-    // FAQ
-  // FAQ
-faqHeading: {
-  type: String,
-  default: "Frequently Asked Questions",
-},
-
-faqImage: {
-  type: String,
-  default: "",
-},
-
-faqCtaText: {
-  type: String,
-  default: "",
-},
-
-faqs: {
-  type: [
-    {
-      q: { type: String, default: "" },
-      a: { type: String, default: "" },
+    faqHeading: {
+      type: String,
+      default: "Frequently Asked Questions",
     },
-  ],
-  default: [],
-},
+    faqImage: { type: String, default: "" },
+    faqCtaText: { type: String, default: "" },
 
+    faqs: {
+      type: [
+        {
+          q: { type: String, default: "" },
+          a: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
 
-    // ✅ BLOG META (NEW)
     status: {
       type: String,
       enum: ["draft", "published"],
@@ -392,8 +304,8 @@ faqs: {
   { timestamps: true }
 );
 
-
-export const SubServiceContentModel = mongoose.model<ISubServiceContent>(
-  "SubServiceContent",
-  SubServiceContentSchema
-);
+export const SubServiceContentModel =
+  mongoose.model<ISubServiceContent>(
+    "SubServiceContent",
+    SubServiceContentSchema
+  );

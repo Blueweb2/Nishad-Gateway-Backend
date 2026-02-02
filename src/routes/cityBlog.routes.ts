@@ -6,9 +6,10 @@ import { adminOnly } from "../middlewares/adminOnly";
 
 import {
   updateCityBlogSchema,
-  cityIdParamSchema,
   citySlugParamSchema,
 } from "../schemas/cityBlog.schema";
+
+import { idParamSchema } from "../schemas/common.params";
 
 import {
   IdRoute,
@@ -16,45 +17,35 @@ import {
   CityBlogUpsertRoute,
 } from "../types/fastify";
 
-
 export default async function cityBlogRoutes(app: FastifyInstance) {
 
+  /* ================= PUBLIC ================= */
 
-
-  /* =========================================
-     PUBLIC – Get Published Blog by Slug
-  ========================================= */
   app.get<CitySlugRoute>(
     "/cities/slug/:citySlug/blog",
-    { schema: { params: citySlugParamSchema } },
+    {
+      schema: { params: citySlugParamSchema },
+    },
     CityBlogController.getByCitySlug
   );
 
-  /* =========================================
-     ADMIN – Get Blog by City ID
-  ========================================= */
+  /* ================= ADMIN ================= */
+
   app.get<IdRoute>(
-    "/cities/id/:id/blog",
+    "/cities/:id/blog",
     {
       preHandler: [auth, adminOnly],
-      schema: { params: cityIdParamSchema },
+      schema: { params: idParamSchema },
     },
     CityBlogController.getByCityId
   );
 
-  /* =========================================
-     ADMIN – Create / Update Blog
-  ========================================= */
   app.put<CityBlogUpsertRoute>(
-    "/cities/id/:id/blog",
+    "/cities/:id/blog",
     {
       preHandler: [auth, adminOnly],
-      schema: {
-        params: cityIdParamSchema,
-        body: updateCityBlogSchema.body,
-      },
+      schema: updateCityBlogSchema,
     },
     CityBlogController.upsert
   );
 }
-

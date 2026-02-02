@@ -38,7 +38,7 @@ app.get<CitySlugRoute>(
 );
 
 app.get<IdRoute>(
-  "/cities/id/:id",
+  "/cities/:id",
   {
     preHandler: [auth, adminOnly],
     schema: getCityByIdSchema,
@@ -47,7 +47,7 @@ app.get<IdRoute>(
 );
 
 app.put<IdRoute>(
-  "/cities/id/:id",
+  "/cities/:id",
   {
     preHandler: [auth, adminOnly],
     schema: updateCitySchema,
@@ -56,7 +56,7 @@ app.put<IdRoute>(
 );
 
 app.delete<IdRoute>(
-  "/cities/id/:id",
+  "/cities/:id",
   {
     preHandler: [auth, adminOnly],
     schema: getCityByIdSchema,

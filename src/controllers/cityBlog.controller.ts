@@ -56,7 +56,7 @@ export const CityBlogController = {
   ) {
     try {
       const { id } = req.params;
-      const { sections, status = "DRAFT" } = req.body;
+      const { sections, status } = req.body;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return reply.code(400).send({ message: "Invalid city ID" });
@@ -67,38 +67,71 @@ export const CityBlogController = {
         return reply.code(404).send({ message: "City not found" });
       }
 
-      if (!Array.isArray(sections) || sections.length === 0) {
-        return reply.code(400).send({
-          message: "At least one section is required",
-        });
-      }
+      /* =========================================
+         If sections provided → validate them
+      ========================================= */
 
-      const orders = sections.map((s) => s.order);
-      if (orders.length !== new Set(orders).size) {
-        return reply.code(400).send({
-          message: "Section order values must be unique",
-        });
-      }
-
-      const heroSections = sections.filter((s) => s.type === "HERO");
-
-      if (heroSections.length !== 1) {
-        return reply.code(400).send({
-          message: "Exactly one HERO section is required",
-        });
-      }
-
-      if (status === "PUBLISHED") {
-        const activeSections = sections.filter((s) => s.isActive);
-
-        if (activeSections.length === 0) {
+      if (sections !== undefined) {
+        if (!Array.isArray(sections) || sections.length === 0) {
           return reply.code(400).send({
-            message: "At least one active section is required to publish",
+            message: "At least one section is required",
           });
         }
 
+        const orders = sections.map((s) => s.order);
+        if (orders.length !== new Set(orders).size) {
+          return reply.code(400).send({
+            message: "Section order values must be unique",
+          });
+        }
+
+        const heroSections = sections.filter((s) => s.type === "HERO");
+        if (heroSections.length !== 1) {
+          return reply.code(400).send({
+            message: "Exactly one HERO section is required",
+          });
+        }
+
+        if (status === "PUBLISHED") {
+          const activeSections = sections.filter((s) => s.isActive);
+
+          if (activeSections.length === 0) {
+            return reply.code(400).send({
+              message: "At least one active section is required to publish",
+            });
+          }
+
+          const activeHeroSections = activeSections.filter(
+            (s) => s.type === "HERO"
+          );
+
+          if (activeHeroSections.length !== 1) {
+            return reply.code(400).send({
+              message: "Exactly one active HERO section is required to publish",
+            });
+          }
+        }
+      }
+
+      /* =========================================
+         If only publishing → validate existing blog
+      ========================================= */
+
+      if (status === "PUBLISHED" && sections === undefined) {
+        const existingBlog = await CityBlogService.getByCityId(id);
+
+        if (!existingBlog || !existingBlog.sections?.length) {
+          return reply.code(400).send({
+            message: "Cannot publish blog without sections",
+          });
+        }
+
+        const activeSections = existingBlog.sections.filter(
+          (s: any) => s.isActive
+        );
+
         const activeHeroSections = activeSections.filter(
-          (s) => s.type === "HERO"
+          (s: any) => s.type === "HERO"
         );
 
         if (activeHeroSections.length !== 1) {

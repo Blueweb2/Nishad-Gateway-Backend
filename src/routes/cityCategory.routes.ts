@@ -18,7 +18,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
      Get categories by city
   ======================================== */
   app.get(
-    "/cities/id/:cityId/categories",
+    "/cities/:cityId/categories",
     { schema: { params: cityIdParamSchema } },
     CityCategoryController.getByCityId
   );
@@ -28,7 +28,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
      Get single category
   ======================================== */
   app.get(
-    "/cities/id/:cityId/categories/:categoryId",
+    "/cities/:cityId/categories/:categoryId",
     { schema: { params: categoryIdParamSchema } },
     CityCategoryController.getById
   );
@@ -39,7 +39,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
 
   // CREATE
   app.post(
-    "/cities/id/:cityId/categories",
+    "/cities/:cityId/categories",
     {
       preHandler: [auth, adminOnly],
       schema: {
@@ -52,7 +52,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
 
   // UPDATE
   app.put(
-    "/cities/id/:cityId/categories/:categoryId",
+    "/cities/:cityId/categories/:categoryId",
     {
       preHandler: [auth, adminOnly],
       schema: {
@@ -65,7 +65,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
 
   // DELETE
   app.delete(
-    "/cities/id/:cityId/categories/:categoryId",
+    "/cities/:cityId/categories/:categoryId",
     {
       preHandler: [auth, adminOnly],
       schema: { params: categoryIdParamSchema },
