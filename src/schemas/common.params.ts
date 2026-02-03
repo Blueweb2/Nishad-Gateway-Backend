@@ -11,3 +11,15 @@ export const idParamSchema = {
     },
   },
 };
+
+/* ======================================================
+   SLUG VALIDATION
+   lowercase letters, numbers, hyphens
+====================================================== */
+
+export const slugSchema = {
+  type: "string",
+  minLength: 2,
+  maxLength: 100,
+  pattern: "^[a-z0-9-]+$",
+};

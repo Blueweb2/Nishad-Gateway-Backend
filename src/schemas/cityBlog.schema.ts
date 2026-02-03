@@ -77,27 +77,17 @@ export const citySectionSchema = {
         properties: {
           content: {
             type: "object",
-            required: ["categories", "introText"],
+            required: ["heading", "introText"],
             additionalProperties: false,
             properties: {
-              categories: {
-                type: "array",
-                items: {
-                  type: "object",
-                  required: ["label", "link"],
-                  additionalProperties: false,
-                  properties: {
-                    label: { type: "string" },
-                    link: { type: "string" },
-                  },
-                },
-              },
+              heading: { type: "string", minLength: 1 },
               introText: { type: "string" },
             },
           },
         },
       },
     },
+
   ],
 };
 

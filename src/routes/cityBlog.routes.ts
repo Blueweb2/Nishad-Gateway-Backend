@@ -10,6 +10,8 @@ import {
 } from "../schemas/cityBlog.schema";
 
 import { idParamSchema } from "../schemas/common.params";
+import { CityPublicBlogController } from "../controllers/cityPublicBlog.controller";
+
 
 import {
   IdRoute,
@@ -48,4 +50,17 @@ export default async function cityBlogRoutes(app: FastifyInstance) {
     },
     CityBlogController.upsert
   );
+
+  /* ================= PUBLIC CATEGORY ================= */
+
+app.get(
+  "/cities/:citySlug/:categorySlug",
+  CityPublicBlogController.getCategoryBlogs
+);
+
+app.get(
+  "/cities/:citySlug/:categorySlug/:blogSlug",
+  CityPublicBlogController.getSingleBlog
+);
+
 }

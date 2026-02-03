@@ -10,6 +10,8 @@ import leadRoutes from "./lead.routes";
 import cityRoutes from "./city.routes";
 import cityBlogRoutes from "./cityBlog.routes";
 import cityCategoryRoutes from "./cityCategory.routes";
+import cityBlogPostRoutes from "./cityBlogPost.routes";
+
 
 
 export default async function routes(app: FastifyInstance) {
@@ -28,6 +30,8 @@ export default async function routes(app: FastifyInstance) {
   app.register(cityRoutes);
   app.register(cityBlogRoutes);
     app.register(cityCategoryRoutes)
+    app.register(cityBlogPostRoutes);
+
 
 
  app.register(uploadRoutes, { prefix: "/upload" });
