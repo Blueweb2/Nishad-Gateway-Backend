@@ -1,17 +1,24 @@
 import fp from "fastify-plugin";
 import cors from "@fastify/cors";
 import { FastifyInstance } from "fastify";
+import { env } from "../config/env";
 
 async function corsPlugin(app: FastifyInstance) {
   await app.register(cors, {
-    origin: ["http://localhost:3000"],
+    origin: (origin, callback) => {
+      // Allow SSR, Postman, curl (no origin)
+      if (!origin) return callback(null, true);
+
+      if (origin === env.CLIENT_URL) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"), false);
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    preflightContinue: false,
   });
 
-  app.log.info(" CORS Plugin Registered");
+  app.log.info(`CORS enabled for ${env.CLIENT_URL}`);
 }
 
 export default fp(corsPlugin);

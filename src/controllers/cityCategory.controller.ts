@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import mongoose from "mongoose";
 import { CityCategoryService } from "../services/cityCategory.service";
-import { CityCategoryParams } from "../types/fastify";
+import { CityCategoryParams } from "../types/routes.types";
 
 export const CityCategoryController = {
 

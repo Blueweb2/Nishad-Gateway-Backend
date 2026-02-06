@@ -1,13 +1,16 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { randomUUID } from "crypto";
 
 /* ======================================================
    TYPES
 ====================================================== */
 
 export interface ICitySection {
+  id: string; // ✅ REQUIRED
   type:
     | "HERO"
     | "CATEGORIES"
+    | "VISION"
     | "INTRO_TEXT"
     | "FEATURE_CARDS"
     | "STATS"
@@ -39,12 +42,19 @@ export interface ICityBlog extends Document {
 ====================================================== */
 
 const CitySectionSchema = new Schema<ICitySection>({
+  id: {
+    type: String,
+    required: true,
+    default: () => randomUUID(), // ✅ AUTO GENERATE
+  },
+
   type: {
     type: String,
     required: true,
     enum: [
       "HERO",
       "CATEGORIES",
+      "VISION",
       "INTRO_TEXT",
       "FEATURE_CARDS",
       "STATS",
@@ -87,7 +97,7 @@ const CityBlogSchema = new Schema<ICityBlog>(
       type: Schema.Types.ObjectId,
       ref: "City",
       required: true,
-      unique: true, // One blog per city
+      unique: true,
     },
 
     sections: {
@@ -104,19 +114,8 @@ const CityBlogSchema = new Schema<ICityBlog>(
   { timestamps: true }
 );
 
-/* ======================================================
-   INDEXES
-====================================================== */
-
-// Optimize public queries
 CityBlogSchema.index({ status: 1 });
-
-// Useful if filtering by city + status
 CityBlogSchema.index({ cityId: 1, status: 1 });
-
-/* ======================================================
-   MODEL EXPORT
-====================================================== */
 
 export const CityBlogModel =
   mongoose.models.CityBlog ||

@@ -17,7 +17,7 @@ import {
   IdRoute,
   CitySlugRoute,
   CityBlogUpsertRoute,
-} from "../types/fastify";
+} from "../types/routes.types";
 
 export default async function cityBlogRoutes(app: FastifyInstance) {
 

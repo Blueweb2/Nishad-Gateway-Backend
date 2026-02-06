@@ -1,4 +1,8 @@
-// schemas/common.params.ts
+import { RouteGenericInterface } from "fastify";
+
+/* ======================================================
+   ID PARAM VALIDATION
+====================================================== */
 
 export const idParamSchema = {
   type: "object",
@@ -14,7 +18,6 @@ export const idParamSchema = {
 
 /* ======================================================
    SLUG VALIDATION
-   lowercase letters, numbers, hyphens
 ====================================================== */
 
 export const slugSchema = {
@@ -23,3 +26,41 @@ export const slugSchema = {
   maxLength: 100,
   pattern: "^[a-z0-9-]+$",
 };
+
+/* =====================================================
+   ADMIN LOG QUERY VALIDATION
+===================================================== */
+
+export const adminLogsQuerySchema = {
+  type: "object",
+  properties: {
+    adminId: {
+      type: "string",
+      minLength: 24,
+      maxLength: 24,
+    },
+    from: {
+      type: "string",
+      format: "date-time",
+    },
+    to: {
+      type: "string",
+      format: "date-time",
+    },
+  },
+  additionalProperties: false,
+};
+
+/* =====================================================
+   ADMIN LOG ROUTE TYPES
+===================================================== */
+
+export interface AdminLogsQuery {
+  adminId?: string;
+  from?: string;
+  to?: string;
+}
+
+export interface AdminLogsRoute extends RouteGenericInterface {
+  Querystring: AdminLogsQuery;
+}

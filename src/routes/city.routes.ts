@@ -3,7 +3,7 @@ import { CityController } from "../controllers/city.controller";
 
 import { auth } from "../middlewares/auth";
 import { adminOnly } from "../middlewares/adminOnly";
-import { IdRoute, CitySlugRoute } from "../types/fastify";
+import { IdRoute, CitySlugRoute } from "../types/routes.types";
 
 
 

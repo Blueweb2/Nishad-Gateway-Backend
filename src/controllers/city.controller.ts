@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CityService } from "../services/city.service";
 import mongoose from "mongoose";
-import { IdRoute, CitySlugRoute } from "../types/fastify";
+import { IdRoute, CitySlugRoute } from "../types/routes.types";
 
 export const CityController = {
 

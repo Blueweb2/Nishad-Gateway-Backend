@@ -24,11 +24,17 @@ export const buildApp = async () => {
     allowedHeaders: ["Content-Type", "Authorization"],
     preflightContinue: false,
   });
+  console.log("CLIENT_URL:", env.CLIENT_URL);
+
 
   //  3) jwt
-  await app.register(fastifyJwt, {
-    secret: env.JWT_SECRET,
-  });
+await app.register(fastifyJwt, {
+  secret: env.JWT_SECRET,
+  cookie: {
+    cookieName: "admin_access_token",
+    signed: false,
+  },
+});
 
   //  4) multipart
   await app.register(multipart, {

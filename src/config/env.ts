@@ -2,6 +2,7 @@ import "dotenv/config";
 
 const required = (key: string) => {
   const value = process.env[key];
+   console.log("NODE_ENV:", process.env.NODE_ENV);
 
   if (!value || value.trim() === "") {
     throw new Error(`Missing required env variable: ${key}`);
@@ -11,9 +12,16 @@ const required = (key: string) => {
 };
 
 export const env = {
-  NODE_ENV: process.env.NODE_ENV || "development",
+NODE_ENV:
+  process.env.NODE_ENV === "production"
+    ? "production"
+    : "development",
+
+   
+
 
   PORT: Number(process.env.PORT) || 5000,
+  
 
   // Mongo (required)
   MONGO_URI: required("MONGO_URI"),

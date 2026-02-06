@@ -5,6 +5,7 @@ import { comparePassword } from "../utils/hash";
 import { createError } from "../utils/errors";
 import { CookieSerializeOptions } from "@fastify/cookie";
 
+// LOGIN
 export const loginAdminService = async (
   app: FastifyInstance,
   email: string,
@@ -25,7 +26,11 @@ export const loginAdminService = async (
   const { accessToken, refreshToken } = createAdminTokens(app, admin);
 
   return {
-    admin: { id: admin._id, email: admin.email, role: "admin" },
+    admin: {
+      id: admin._id,
+      email: admin.email,
+      role: admin.role, // ✅ FIXED
+    },
     accessToken,
     refreshToken,
     accessCookie: getCookieOptions("access"),
@@ -33,21 +38,19 @@ export const loginAdminService = async (
   };
 };
 
+// LOGOUT
 export const logoutAdminService = () => {
-const isProd = process.env.NODE_ENV === "production";
+  const clearOptions: CookieSerializeOptions = {
+    path: "/",
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+  };
 
-
-const clearOptions: CookieSerializeOptions = {
-path: "/",
-httpOnly: true,
-sameSite: "none", //  MUST match login cookies
-secure: true,
+  return { clearOptions };
 };
 
-
-return { clearOptions };
-};
-
+// REFRESH TOKEN
 export const refreshAdminTokenService = async (
   app: FastifyInstance,
   refreshToken?: string
@@ -69,7 +72,12 @@ export const refreshAdminTokenService = async (
   }
 
   const accessToken = app.jwt.sign(
-    { id: decoded.id, email: decoded.email, role: "admin" },
+    {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role, // ✅ FIXED
+      type: "access",
+    },
     { expiresIn: "15m" }
   );
 
@@ -79,6 +87,7 @@ export const refreshAdminTokenService = async (
   };
 };
 
+// SESSION CHECK
 export const adminMeService = async (
   app: FastifyInstance,
   accessToken?: string
@@ -98,6 +107,6 @@ export const adminMeService = async (
   return {
     id: user.id,
     email: user.email,
-    role: user.role,
+    role: user.role, // ✅ dynamic role
   };
 };

@@ -6,7 +6,7 @@ import { idParamSchema } from "./common.params";
 
 export const citySectionSchema = {
   type: "object",
-  required: ["type", "content", "order"],
+  required: ["id", "type", "content", "order"],
   additionalProperties: false,
 
   properties: {
@@ -15,6 +15,7 @@ export const citySectionSchema = {
       enum: [
         "HERO",
         "CATEGORIES",
+        "VISION",
         "INTRO_TEXT",
         "FEATURE_CARDS",
         "STATS",
@@ -87,6 +88,28 @@ export const citySectionSchema = {
         },
       },
     },
+
+    /* ================= VISION ================= */
+{
+  if: {
+    properties: { type: { const: "VISION" } },
+  },
+  then: {
+    properties: {
+      content: {
+        type: "object",
+        required: ["heading", "content", "imageUrl"],
+        additionalProperties: false,
+        properties: {
+          heading: { type: "string", minLength: 1 },
+          content: { type: "string" },
+          imageUrl: { type: "string" },
+        },
+      },
+    },
+  },
+},
+
 
   ],
 };
