@@ -9,8 +9,8 @@ export interface ICity extends Document {
   citySlug: string;
   cityImage: string;
 
-  bestSuitedFor: string;
-  focus: string;
+  heading: string;
+  description: string;
 
   tag: "ARTICLE" | "FEATURED" | "TRENDING";
   order: number;
@@ -45,12 +45,15 @@ const CitySchema = new Schema<ICity>(
       default: "",
     },
 
-    bestSuitedFor: {
+    // NEW FIELD
+    heading: {
       type: String,
-      default: "",
+      required: true,
+      trim: true,
     },
 
-    focus: {
+    // NEW FIELD
+    description: {
       type: String,
       default: "",
     },
@@ -75,16 +78,11 @@ const CitySchema = new Schema<ICity>(
 );
 
 /* ======================================================
-   INDEXES (ADD AFTER SCHEMA CREATION)
+   INDEXES
 ====================================================== */
 
-// Optimize homepage city sorting
 CitySchema.index({ order: 1 });
-
-// Optimize filtering active cities
 CitySchema.index({ isActive: 1 });
-
-// If you often fetch only active sorted cities:
 CitySchema.index({ isActive: 1, order: 1 });
 
 /* ======================================================

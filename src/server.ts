@@ -8,9 +8,13 @@ async function start() {
 
     const app = await buildApp();
 
+await app.listen({
+  port: env.PORT,
+  host: "0.0.0.0",
+});
 
 
-    await app.listen({ port: env.PORT, host: "0.0.0.0" });
+    // await app.listen({ port: env.PORT, host: "0.0.0.0" });
     // await app.listen({ port: env.PORT, host: "127.0.0.1" });
 
    console.log(` Server running on port ${env.PORT}`);

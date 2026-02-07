@@ -1,6 +1,8 @@
 
 
 // schemas/city.schema.ts
+// schemas/city.schema.ts
+
 export const cityBaseSchema = {
   cityName: {
     type: "string",
@@ -22,14 +24,17 @@ export const cityBaseSchema = {
     ],
   },
 
-  bestSuitedFor: {
+  // ✅ NEW FIELD
+  heading: {
     type: "string",
-    maxLength: 300,
+    minLength: 2,
+    maxLength: 150,
   },
 
-  focus: {
+  // ✅ NEW FIELD
+  description: {
     type: "string",
-    maxLength: 300,
+    maxLength: 2000,
   },
 
   tag: {
@@ -39,7 +44,7 @@ export const cityBaseSchema = {
   },
 
   order: {
-    type: "integer",   // better
+    type: "integer",
     minimum: 0,
     default: 0,
   },
@@ -50,20 +55,26 @@ export const cityBaseSchema = {
   },
 };
 
+
+// schemas/city.create.schema.ts
+
 // schemas/city.create.schema.ts
 
 export const createCitySchema = {
   body: {
     type: "object",
-    required: ["cityName", "citySlug"],
+    required: ["cityName", "citySlug", "heading"],
     additionalProperties: false,
     properties: cityBaseSchema,
   },
 };
 
 
+
 // schemas/city.update.schema.ts
 
+
+// schemas/city.update.schema.ts
 
 export const updateCitySchema = {
   params: {
@@ -82,6 +93,7 @@ export const updateCitySchema = {
   },
 };
 
+
 // Add Index Validation Schema for GET by ID
 
 export const cityIdParamSchema = {
@@ -93,8 +105,6 @@ export const cityIdParamSchema = {
     },
   },
 };
-
-
 
 export const getCityByIdSchema = {
   params: {
