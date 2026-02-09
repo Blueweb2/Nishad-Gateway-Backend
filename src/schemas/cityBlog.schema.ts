@@ -16,7 +16,7 @@ export const citySectionSchema = {
         "HERO",
         "CATEGORIES",
         "VISION",
-        "INTRO_TEXT",
+        "INVESTMENT_HIGHLIGHTS",
         "FEATURE_CARDS",
         "STATS",
         "IMAGE_TEXT",
@@ -109,6 +109,80 @@ export const citySectionSchema = {
     },
   },
 },
+
+/* ================= INVESTMENT HIGHLIGHTS ================= */
+{
+  if: {
+    properties: { type: { const: "INVESTMENT_HIGHLIGHTS" } },
+  },
+  then: {
+    properties: {
+      content: {
+        type: "object",
+        required: ["heading", "description", "highlights"],
+        additionalProperties: false,
+        properties: {
+          heading: { type: "string", minLength: 1 },
+          description: { type: "string" },
+          highlights: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              required: ["number", "title", "imageUrl"],
+              additionalProperties: false,
+              properties: {
+                number: { type: "string" },
+                title: { type: "string" },
+                imageUrl: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+},
+
+/* ================= BUSINESS SETUP OPTIONS ================= */
+{
+  if: {
+    properties: { type: { const: "BUSINESS_SETUP_OPTIONS" } },
+  },
+  then: {
+    properties: {
+      content: {
+        type: "object",
+        required: ["heading", "description", "options"],
+        additionalProperties: false,
+        properties: {
+          heading: { type: "string", minLength: 1 },
+          description: { type: "string" },
+          options: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              required: ["title", "link"],
+              additionalProperties: false,
+              properties: {
+                title: { type: "string" },
+                link: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+},
+
+/* ---------- NATURE PARKS ---------- */
+
+
+
+
+
 
 
   ],

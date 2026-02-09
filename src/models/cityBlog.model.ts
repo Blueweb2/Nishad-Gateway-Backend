@@ -11,7 +11,8 @@ export interface ICitySection {
     | "HERO"
     | "CATEGORIES"
     | "VISION"
-    | "INTRO_TEXT"
+    |"BUSINESS_SETUP_OPTIONS"
+    | "INVESTMENT_HIGHLIGHTS"
     | "FEATURE_CARDS"
     | "STATS"
     | "IMAGE_TEXT"
@@ -55,7 +56,8 @@ const CitySectionSchema = new Schema<ICitySection>({
       "HERO",
       "CATEGORIES",
       "VISION",
-      "INTRO_TEXT",
+      "INVESTMENT_HIGHLIGHTS",
+      "BUSINESS_SETUP_OPTIONS", 
       "FEATURE_CARDS",
       "STATS",
       "IMAGE_TEXT",
