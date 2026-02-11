@@ -5,15 +5,26 @@ export const CityService = {
         return CityModel.create(payload);
     },
 
-    async getCities(query: any) {
-        const filter: any = {};
+    // async getCities(query: any) {
+    //     const filter: any = {};
 
-        if (query?.isActive !== undefined) {
-            filter.isActive = query.isActive === "true";
-        }
+    //     if (query?.isActive !== undefined) {
+    //         filter.isActive = query.isActive === "true";
+    //     }
 
-        return CityModel.find(filter).sort({ order: 1, createdAt: -1 });
-    },
+    //     return CityModel.find(filter).sort({ order: 1, createdAt: -1 });
+    // },
+      async getPublicCities() {
+    return CityModel.find({ isActive: true })
+      .sort({ order: 1 })
+      .lean();
+  },
+
+  async getAllCities() {
+    return CityModel.find()
+      .sort({ order: 1 })
+      .lean();
+  },
 
     async getCityBySlug(citySlug: string) {
         return CityModel.findOne({ citySlug });
@@ -32,4 +43,7 @@ export const CityService = {
     async deleteCity(id: string) {
         return CityModel.findByIdAndDelete(id);
     },
+
+
+
 };

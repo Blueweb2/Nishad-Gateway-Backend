@@ -34,18 +34,27 @@ export const CityController = {
 
   /* ================= GET ALL ================= */
 
-  async getAll(
+ async getPublic(
     req: FastifyRequest,
     reply: FastifyReply
   ) {
     try {
-      const cities = await CityService.getCities(req.query);
-      return reply.code(200).send({ cities });
-
+      const cities = await CityService.getPublicCities();
+      return reply.send({ cities });
     } catch {
-      return reply.code(500).send({
-        message: "Failed to fetch cities",
-      });
+      return reply.code(500).send({ message: "Failed to fetch cities" });
+    }
+  },
+
+  async getAllAdmin(
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      const cities = await CityService.getAllCities();
+      return reply.send({ cities });
+    } catch {
+      return reply.code(500).send({ message: "Failed to fetch cities" });
     }
   },
 
@@ -182,4 +191,6 @@ export const CityController = {
       });
     }
   },
+
+
 };

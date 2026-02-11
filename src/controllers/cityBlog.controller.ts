@@ -8,6 +8,7 @@ import {
   CityBlogUpsertRoute,
 } from "../types/routes.types";
 import { ICityBlog } from "../models/cityBlog.model";
+import { log } from "console";
 
 export const CityBlogController = {
 
@@ -179,6 +180,9 @@ async upsert(
     reply: FastifyReply
   ) {
     try {
+
+     
+      
       const { citySlug } = req.params;
 
       if (!citySlug?.trim()) {
