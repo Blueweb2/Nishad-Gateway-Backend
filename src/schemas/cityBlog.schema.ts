@@ -10,6 +10,11 @@ export const citySectionSchema = {
   additionalProperties: false,
 
   properties: {
+    id: {
+      type: "string",
+      minLength: 1,
+    },
+
     type: {
       type: "string",
       enum: [
@@ -17,13 +22,14 @@ export const citySectionSchema = {
         "CATEGORIES",
         "VISION",
         "INVESTMENT_HIGHLIGHTS",
+        "INFRASTRUCTURE",
+        "BUSINESS_SETUP_OPTIONS",
         "FEATURE_CARDS",
         "STATS",
         "IMAGE_TEXT",
         "BUSINESS",
         "LIFESTYLE",
         "STEPS",
-        "INFRASTRUCTURE",
         "PLACES_GRID",
         "FAQ",
         "CTA",
@@ -32,11 +38,14 @@ export const citySectionSchema = {
 
     title: { type: "string" },
 
-    content: { type: "object" },
+    content: {
+      type: "object",
+      minProperties: 1,
+    },
 
     order: {
       type: "number",
-      minimum: 0,
+      minimum: 1,
     },
 
     isActive: {
@@ -46,10 +55,10 @@ export const citySectionSchema = {
   },
 
   allOf: [
-    /* ================= HERO ================= */
     {
       if: {
         properties: { type: { const: "HERO" } },
+        required: ["type"],
       },
       then: {
         properties: {
@@ -61,6 +70,7 @@ export const citySectionSchema = {
               heading: { type: "string", minLength: 1 },
               subheading: { type: "string" },
               backgroundImage: { type: "string" },
+              backgroundImagePublicId: { type: "string" },
               ctaText: { type: "string" },
               ctaLink: { type: "string" },
             },
@@ -68,6 +78,7 @@ export const citySectionSchema = {
         },
       },
     },
+
 
     /* ================= CATEGORIES ================= */
     {
@@ -104,6 +115,7 @@ export const citySectionSchema = {
           heading: { type: "string", minLength: 1 },
           content: { type: "string" },
           imageUrl: { type: "string" },
+          imagePublicId: { type: "string" },
         },
       },
     },
@@ -119,22 +131,33 @@ export const citySectionSchema = {
     properties: {
       content: {
         type: "object",
-        required: ["heading", "description", "highlights"],
+        required: ["mainHeading", "description", "cards"],
         additionalProperties: false,
         properties: {
-          heading: { type: "string", minLength: 1 },
-          description: { type: "string" },
-          highlights: {
+          mainHeading: { type: "string", minLength: 1 },
+          description: { type: "string", minLength: 1 },
+
+          cards: {
             type: "array",
             minItems: 1,
             items: {
               type: "object",
-              required: ["number", "title", "imageUrl"],
+              required: [
+                "mainImage",
+                "subImage",
+                "title",
+                "subText",
+              ],
               additionalProperties: false,
               properties: {
-                number: { type: "string" },
-                title: { type: "string" },
-                imageUrl: { type: "string" },
+                mainImage: { type: "string", minLength: 1 },
+                mainImagePublicId: { type: "string" }, // ✅
+
+                subImage: { type: "string", minLength: 1 },
+                subImagePublicId: { type: "string" }, // ✅
+
+                title: { type: "string", minLength: 1 },
+                subText: { type: "string", minLength: 1 },
               },
             },
           },
@@ -143,6 +166,8 @@ export const citySectionSchema = {
     },
   },
 },
+
+
 
 /* ================= BUSINESS SETUP OPTIONS ================= */
 {
@@ -157,7 +182,8 @@ export const citySectionSchema = {
         additionalProperties: false,
         properties: {
           heading: { type: "string", minLength: 1 },
-          description: { type: "string" },
+          description: { type: "string", minLength: 1 },
+
           options: {
             type: "array",
             minItems: 1,
@@ -166,8 +192,48 @@ export const citySectionSchema = {
               required: ["title", "link"],
               additionalProperties: false,
               properties: {
-                title: { type: "string" },
-                link: { type: "string" },
+                title: { type: "string", minLength: 1 },
+                link: { type: "string", minLength: 1 },
+             
+              },
+            },
+          },
+
+          decisionFlow: { type: "string" },   // ✅ optional
+          bottomText: { type: "string" },     // ✅ optional
+        },
+      },
+    },
+  },
+},
+
+
+{
+  if: {
+    properties: { type: { const: "INFRASTRUCTURE" } },
+  },
+  then: {
+    properties: {
+      content: {
+        type: "object",
+        required: ["heading", "description", "slides"],
+        additionalProperties: false,
+        properties: {
+          heading: { type: "string", minLength: 1 },
+          description: { type: "string", minLength: 1 },
+
+          slides: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              required: ["imageUrl", "title", "text"],
+              additionalProperties: false,
+              properties: {
+                imageUrl: { type: "string", minLength: 1 },
+                imagePublicId: { type: "string" },
+                title: { type: "string", minLength: 1 },
+                text: { type: "string", minLength: 1 },
               },
             },
           },
@@ -176,6 +242,9 @@ export const citySectionSchema = {
     },
   },
 },
+
+
+
 
 /* ---------- NATURE PARKS ---------- */
 

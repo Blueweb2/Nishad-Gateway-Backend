@@ -15,15 +15,15 @@ export default async function cityBlogPostRoutes(app: FastifyInstance) {
 
   /* ================= PUBLIC ================= */
 
-  app.get(
-    "/public/cities/:citySlug/:categorySlug/:blogSlug",
-    {
-      schema: {
-        params: publicCityBlogPostParamsSchema,
-      },
-    },
-    CityBlogPostController.getPublicBlogDetail
-  );
+  // app.get(
+  //   "/cities/:citySlug/:categorySlug/:blogSlug",
+  //   {
+  //     schema: {
+  //       params: publicCityBlogPostParamsSchema,
+  //     },
+  //   },
+  //   CityBlogPostController.getPublicBlogDetail
+  // );
 
   /* ================= ADMIN ================= */
 

@@ -13,6 +13,7 @@ export interface ICitySection {
     | "VISION"
     |"BUSINESS_SETUP_OPTIONS"
     | "INVESTMENT_HIGHLIGHTS"
+    | "INFRASTRUCTURE"
     | "FEATURE_CARDS"
     | "STATS"
     | "IMAGE_TEXT"
@@ -57,6 +58,7 @@ const CitySectionSchema = new Schema<ICitySection>({
       "CATEGORIES",
       "VISION",
       "INVESTMENT_HIGHLIGHTS",
+      "INFRASTRUCTURE",
       "BUSINESS_SETUP_OPTIONS", 
       "FEATURE_CARDS",
       "STATS",

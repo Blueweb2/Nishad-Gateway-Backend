@@ -11,6 +11,8 @@ import cityRoutes from "./city.routes";
 import cityBlogRoutes from "./cityBlog.routes";
 import cityCategoryRoutes from "./cityCategory.routes";
 import cityBlogPostRoutes from "./cityBlogPost.routes";
+ import mediaCleanupRoutes from "./mediaCleanup.routes";
+
 
 
 
@@ -35,6 +37,9 @@ export default async function routes(app: FastifyInstance) {
 
 
  app.register(uploadRoutes, { prefix: "/upload" });
+
+await app.register(mediaCleanupRoutes, { prefix: "/api" });
+
   app.register(leadRoutes);
 
 }

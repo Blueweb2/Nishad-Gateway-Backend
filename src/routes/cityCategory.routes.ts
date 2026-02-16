@@ -37,39 +37,54 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
      ADMIN ROUTES (PROTECTED)
   ======================================== */
 
-  // CREATE
-  app.post(
-    "/cities/:cityId/categories",
-    {
-      preHandler: [auth, adminOnly],
-      schema: {
-        params: cityIdParamSchema,
-        body: createCityCategoryBodySchema,
-      },
-    },
-    CityCategoryController.create
-  );
+ /* ========================================
+   ADMIN ROUTES (PROTECTED)
+======================================== */
 
-  // UPDATE
-  app.put(
-    "/cities/:cityId/categories/:categoryId",
-    {
-      preHandler: [auth, adminOnly],
-      schema: {
-        params: categoryIdParamSchema,
-        body: updateCityCategoryBodySchema,
-      },
-    },
-    CityCategoryController.update
-  );
+// GET ALL (ADMIN)
+app.get(
+  "/admin/cities/:cityId/categories",
+  {
+    preHandler: [auth, adminOnly],
+    schema: { params: cityIdParamSchema },
+  },
+  CityCategoryController.getByCityId
+);
 
-  // DELETE
-  app.delete(
-    "/cities/:cityId/categories/:categoryId",
-    {
-      preHandler: [auth, adminOnly],
-      schema: { params: categoryIdParamSchema },
+// CREATE
+app.post(
+  "/admin/cities/:cityId/categories",
+  {
+    preHandler: [auth, adminOnly],
+    schema: {
+      params: cityIdParamSchema,
+      body: createCityCategoryBodySchema,
     },
-    CityCategoryController.remove
-  );
+  },
+  CityCategoryController.create
+);
+
+// UPDATE
+app.put(
+  "/admin/cities/:cityId/categories/:categoryId",
+  {
+    preHandler: [auth, adminOnly],
+    schema: {
+      params: categoryIdParamSchema,
+      body: updateCityCategoryBodySchema,
+    },
+  },
+  CityCategoryController.update
+);
+
+// DELETE
+app.delete(
+  "/admin/cities/:cityId/categories/:categoryId",
+  {
+    preHandler: [auth, adminOnly],
+    schema: { params: categoryIdParamSchema },
+  },
+  CityCategoryController.remove
+);
+
 }

@@ -34,7 +34,7 @@ export default async function cityBlogRoutes(app: FastifyInstance) {
   /* ================= ADMIN ================= */
 
   app.get<IdRoute>(
-    "/cities/:id/blog",
+    "/admin/cities/:id/blog",
     {
       preHandler: [auth, adminOnly],
       schema: { params: idParamSchema },
@@ -43,7 +43,7 @@ export default async function cityBlogRoutes(app: FastifyInstance) {
   );
 
   app.put<CityBlogUpsertRoute>(
-    "/cities/:id/blog",
+    "/admin/cities/:id/blog",
     {
       preHandler: [auth, adminOnly],
       schema: updateCityBlogSchema,

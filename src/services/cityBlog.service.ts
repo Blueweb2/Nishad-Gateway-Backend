@@ -3,17 +3,17 @@ import { CityBlogModel } from "../models/cityBlog.model";
 import { CityModel } from "../models/City.model";
 import { CityCategoryModel } from "../models/cityCategory.model";
 import { CityBlogPostModel } from "../models/cityBlogPost.model";
+import { deleteCloudinaryImageService } from "./cloudinary.service";
+
+type BlogStatus = "DRAFT" | "PUBLISHED";
 
 export const CityBlogService = {
 
   /* ======================================================
-     ADMIN – GET BLOG (CMS SECTIONS)
+     ADMIN – GET BLOG
   ====================================================== */
-
   async getByCityId(cityId: string) {
-    if (!mongoose.Types.ObjectId.isValid(cityId)) {
-      return null;
-    }
+    if (!mongoose.Types.ObjectId.isValid(cityId)) return null;
 
     return CityBlogModel.findOne({
       cityId: new mongoose.Types.ObjectId(cityId),
@@ -21,13 +21,85 @@ export const CityBlogService = {
   },
 
   /* ======================================================
-     ADMIN – UPSERT CMS BLOG
+     INTERNAL – VALIDATE SECTIONS
   ====================================================== */
+  validateSections(sections: any[], status?: BlogStatus) {
+    if (!Array.isArray(sections) || sections.length === 0) {
+      throw new Error("At least one section is required");
+    }
 
+    const orders = sections.map((s) => s.order);
+    if (orders.length !== new Set(orders).size) {
+      throw new Error("Section order values must be unique");
+    }
+
+    const heroSections = sections.filter((s) => s.type === "HERO");
+    if (heroSections.length !== 1) {
+      throw new Error("Exactly one HERO section is required");
+    }
+
+    if (status === "PUBLISHED") {
+      const activeSections = sections.filter((s) => s.isActive);
+
+      if (activeSections.length === 0) {
+        throw new Error("At least one active section is required to publish");
+      }
+
+      const activeHero = activeSections.filter(
+        (s) => s.type === "HERO"
+      );
+
+      if (activeHero.length !== 1) {
+        throw new Error(
+          "Exactly one active HERO section is required to publish"
+        );
+      }
+    }
+  },
+
+  /* ======================================================
+     INTERNAL – EXTRACT MEDIA PUBLIC IDS
+  ====================================================== */
+  extractPublicIds(sections: any[] = []) {
+    const publicIds: string[] = [];
+
+    for (const section of sections) {
+      const content = section.content;
+
+      if (section.type === "HERO") {
+        if (content.backgroundImagePublicId) {
+          publicIds.push(content.backgroundImagePublicId);
+        }
+      }
+
+      if (section.type === "VISION") {
+        if (content.imagePublicId) {
+          publicIds.push(content.imagePublicId);
+        }
+      }
+
+      if (section.type === "INVESTMENT_HIGHLIGHTS") {
+        content.cards?.forEach((card: any) => {
+          if (card.mainImagePublicId) {
+            publicIds.push(card.mainImagePublicId);
+          }
+          if (card.subImagePublicId) {
+            publicIds.push(card.subImagePublicId);
+          }
+        });
+      }
+    }
+
+    return publicIds;
+  },
+
+  /* ======================================================
+     ADMIN – UPSERT (SAFE + CLEANUP)
+  ====================================================== */
   async upsert(
     cityId: string,
     sections?: any[],
-    status?: "DRAFT" | "PUBLISHED"
+    status?: BlogStatus
   ) {
     if (!mongoose.Types.ObjectId.isValid(cityId)) {
       throw new Error("Invalid cityId");
@@ -35,17 +107,43 @@ export const CityBlogService = {
 
     const objectCityId = new mongoose.Types.ObjectId(cityId);
 
+    // 🔥 Get existing blog BEFORE update
+    const existingBlog = await CityBlogModel.findOne({
+      cityId: objectCityId,
+    }).lean();
+
+    const oldPublicIds = this.extractPublicIds(existingBlog?.sections || []);
+
     const updateData: any = {};
 
+    /* ===== Validate & Normalize Sections ===== */
     if (sections !== undefined) {
-      updateData.sections = sections;
+      this.validateSections(sections, status);
+
+      const normalizedSections = [...sections]
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .map((section, index) => ({
+          ...section,
+          order: index + 1,
+        }));
+
+      updateData.sections = normalizedSections;
+    }
+
+    /* ===== Publish Without Sections Update ===== */
+    if (status === "PUBLISHED" && sections === undefined) {
+      if (!existingBlog?.sections?.length) {
+        throw new Error("Cannot publish blog without sections");
+      }
+
+      this.validateSections(existingBlog.sections, "PUBLISHED");
     }
 
     if (status !== undefined) {
       updateData.status = status;
     }
 
-    return CityBlogModel.findOneAndUpdate(
+    const updatedBlog = await CityBlogModel.findOneAndUpdate(
       { cityId: objectCityId },
       { $set: updateData },
       {
@@ -54,12 +152,30 @@ export const CityBlogService = {
         runValidators: true,
       }
     ).lean();
+
+    /* ===== CLEANUP UNUSED IMAGES ===== */
+    if (sections !== undefined) {
+      const newPublicIds = this.extractPublicIds(updatedBlog?.sections || []);
+
+      const removedPublicIds = oldPublicIds.filter(
+        (id) => !newPublicIds.includes(id)
+      );
+
+      for (const publicId of removedPublicIds) {
+        try {
+          await deleteCloudinaryImageService(publicId);
+        } catch (err) {
+          console.error("Cloudinary cleanup failed:", publicId);
+        }
+      }
+    }
+
+    return updatedBlog;
   },
 
   /* ======================================================
-     PUBLIC – GET CITY PAGE (SECTIONS + CATEGORIES)
+     PUBLIC – CITY PAGE
   ====================================================== */
-
   async getByCitySlug(citySlug: string) {
     const city = await CityModel.findOne({
       citySlug,
@@ -89,17 +205,15 @@ export const CityBlogService = {
         cityName: city.cityName,
         citySlug: city.citySlug,
       },
-      sections: blog.sections,
+      sections: blog.sections.filter((s: any) => s.isActive),
       categories,
       status: blog.status,
     };
   },
 
   /* ======================================================
-     PUBLIC – GET BLOG DETAIL
-     /cities/:citySlug/:categorySlug/:blogSlug
+     PUBLIC – BLOG DETAIL
   ====================================================== */
-
   async getPublicBlogDetail(
     citySlug: string,
     categorySlug: string,
@@ -141,5 +255,4 @@ export const CityBlogService = {
       blog,
     };
   },
-
 };

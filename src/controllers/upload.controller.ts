@@ -2,6 +2,8 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { sendResponse } from "../utils/response";
 
 import { getSignedCloudinaryUploadParamsService } from "../services/cloudinarySigned.service";
+import { deleteCloudinaryImageService } from "../services/cloudinary.service";
+
 
 // ===================================
 //  SIGNED UPLOAD PARAMS (secure flow)
@@ -27,6 +29,8 @@ export const getSignedUpload = async (
       "nishad-gateway/cities/hero",
       "nishad-gateway/subservices/icons",
       "nishad-gateway/cities/vision",
+      "nishad-gateway/cities/investment",
+      "nishad-gateway/cities/infrastructure"
     ];
 
     if (!allowedFolders.includes(cleanFolder)) {
@@ -44,6 +48,37 @@ export const getSignedUpload = async (
       err.statusCode || 500,
       false,
       err?.message || "Signed upload failed",
+      null
+    );
+  }
+};
+
+
+// ===================================
+// DELETE IMAGE
+// ===================================
+export const deleteImage = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { publicId } = req.body as { publicId?: string };
+
+    if (!publicId) {
+      return sendResponse(reply, 400, false, "publicId is required", null);
+    }
+
+    const result = await deleteCloudinaryImageService(publicId);
+
+    return sendResponse(reply, 200, true, "Image deleted", result);
+  } catch (err: any) {
+    req.log.error(err);
+
+    return sendResponse(
+      reply,
+      err.statusCode || 500,
+      false,
+      err?.message || "Delete failed",
       null
     );
   }
