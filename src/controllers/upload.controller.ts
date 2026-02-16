@@ -30,7 +30,11 @@ export const getSignedUpload = async (
       "nishad-gateway/subservices/icons",
       "nishad-gateway/cities/vision",
       "nishad-gateway/cities/investment",
-      "nishad-gateway/cities/infrastructure"
+      "nishad-gateway/cities/infrastructure",
+      "nishad-gateway/cities/food-guide",
+      "nishad-gateway/cities/transportation",
+      "nishad-gateway/cities/snapshot",
+      "nishad-gateway/cities/future-outlook",
     ];
 
     if (!allowedFolders.includes(cleanFolder)) {

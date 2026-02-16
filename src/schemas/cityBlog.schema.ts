@@ -24,15 +24,11 @@ export const citySectionSchema = {
         "INVESTMENT_HIGHLIGHTS",
         "INFRASTRUCTURE",
         "BUSINESS_SETUP_OPTIONS",
-        "FEATURE_CARDS",
-        "STATS",
-        "IMAGE_TEXT",
-        "BUSINESS",
-        "LIFESTYLE",
-        "STEPS",
-        "PLACES_GRID",
-        "FAQ",
-        "CTA",
+        "LANDMARKS",
+        "FOOD_GUIDE",
+        "TRANSPORTATION_GUIDE",
+        "EXPANDABLE_SNAPSHOT",
+        "FUTURE_OUTLOOK",
       ],
     },
 
@@ -101,155 +97,364 @@ export const citySectionSchema = {
     },
 
     /* ================= VISION ================= */
-{
-  if: {
-    properties: { type: { const: "VISION" } },
-  },
-  then: {
-    properties: {
-      content: {
-        type: "object",
-        required: ["heading", "content", "imageUrl"],
-        additionalProperties: false,
+    {
+      if: {
+        properties: { type: { const: "VISION" } },
+      },
+      then: {
         properties: {
-          heading: { type: "string", minLength: 1 },
-          content: { type: "string" },
-          imageUrl: { type: "string" },
-          imagePublicId: { type: "string" },
+          content: {
+            type: "object",
+            required: ["heading", "content", "imageUrl"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+              content: { type: "string" },
+              imageUrl: { type: "string" },
+              imagePublicId: { type: "string" },
+            },
+          },
         },
       },
     },
-  },
-},
 
-/* ================= INVESTMENT HIGHLIGHTS ================= */
-{
+    /* ================= INVESTMENT HIGHLIGHTS ================= */
+    {
+      if: {
+        properties: { type: { const: "INVESTMENT_HIGHLIGHTS" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["mainHeading", "description", "cards"],
+            additionalProperties: false,
+            properties: {
+              mainHeading: { type: "string", minLength: 1 },
+              description: { type: "string", minLength: 1 },
+
+              cards: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  required: [
+                    "mainImage",
+                    "subImage",
+                    "title",
+                    "subText",
+                  ],
+                  additionalProperties: false,
+                  properties: {
+                    mainImage: { type: "string", minLength: 1 },
+                    mainImagePublicId: { type: "string" }, // ✅
+
+                    subImage: { type: "string", minLength: 1 },
+                    subImagePublicId: { type: "string" }, // ✅
+
+                    title: { type: "string", minLength: 1 },
+                    subText: { type: "string", minLength: 1 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+
+
+    /* ================= BUSINESS SETUP OPTIONS ================= */
+    {
+      if: {
+        properties: { type: { const: "BUSINESS_SETUP_OPTIONS" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["heading", "description", "options"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+              description: { type: "string", minLength: 1 },
+
+              options: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  required: ["title", "link"],
+                  additionalProperties: false,
+                  properties: {
+                    title: { type: "string", minLength: 1 },
+                    link: { type: "string", minLength: 1 },
+
+                  },
+                },
+              },
+
+              decisionFlow: { type: "string" },   // ✅ optional
+              bottomText: { type: "string" },     // ✅ optional
+            },
+          },
+        },
+      },
+    },
+
+
+    {
+      if: {
+        properties: { type: { const: "INFRASTRUCTURE" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["heading", "description", "slides"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+              description: { type: "string", minLength: 1 },
+
+              slides: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  required: ["imageUrl", "title", "text"],
+                  additionalProperties: false,
+                  properties: {
+                    imageUrl: { type: "string", minLength: 1 },
+                    imagePublicId: { type: "string" },
+                    title: { type: "string", minLength: 1 },
+                    text: { type: "string", minLength: 1 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+
+
+    /* ================= LANDMARKS ================= */
+    {
+      if: {
+        properties: { type: { const: "LANDMARKS" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["heading", "items"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+
+              ctaText: { type: "string" },
+              ctaLink: { type: "string" },
+
+              items: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  required: ["title", "description", "link"], // ✅ updated
+                  additionalProperties: false,
+                  properties: {
+                    title: { type: "string", minLength: 1 },
+                    description: { type: "string", minLength: 1 },
+                    link: { type: "string", minLength: 1 }, // ✅ added
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+
+
+    /* ================= FOOD GUIDE ================= */
+    {
+      if: {
+        properties: { type: { const: "FOOD_GUIDE" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["heading", "filters"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+
+              filters: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  required: ["label", "items"],
+                  additionalProperties: false,
+                  properties: {
+                    label: { type: "string", minLength: 1 },
+
+                    items: {
+                      type: "array",
+                      minItems: 1,
+                      items: {
+                        type: "object",
+                        required: [
+                          "imageUrl",
+                          "title",
+                          "description",
+                          "link"
+                        ],
+                        additionalProperties: false,
+                        properties: {
+                          imageUrl: { type: "string", minLength: 1 },
+                          imagePublicId: { type: "string" },
+                          title: { type: "string", minLength: 1 },
+                          description: { type: "string", minLength: 1 },
+                          link: { type: "string", minLength: 1 },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+
+
+    /* ================= TRANSPORTATION GUIDE ================= */
+    {
+      if: {
+        properties: { type: { const: "TRANSPORTATION_GUIDE" } },
+      },
+      then: {
+        properties: {
+          content: {
+            type: "object",
+            required: ["heading", "slides"],
+            additionalProperties: false,
+            properties: {
+              heading: { type: "string", minLength: 1 },
+
+              slides: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  required: [
+                    "label",
+                    "backgroundImage",
+                    "title",
+                    "link"
+                  ],
+                  additionalProperties: false,
+                  properties: {
+                    label: { type: "string", minLength: 1 },
+                    backgroundImage: { type: "string", minLength: 1 },
+                    backgroundImagePublicId: { type: "string" },
+                    title: { type: "string", minLength: 1 },
+                    link: { type: "string", minLength: 1 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+
+    {
   if: {
-    properties: { type: { const: "INVESTMENT_HIGHLIGHTS" } },
+    properties: { type: { const: "EXPANDABLE_SNAPSHOT" } },
   },
   then: {
     properties: {
       content: {
         type: "object",
-        required: ["mainHeading", "description", "cards"],
+        required: ["heading", "cards"],
         additionalProperties: false,
         properties: {
-          mainHeading: { type: "string", minLength: 1 },
-          description: { type: "string", minLength: 1 },
+          heading: { type: "string", minLength: 1 },
 
           cards: {
             type: "array",
-            minItems: 1,
+            minItems: 2,
             items: {
               type: "object",
-              required: [
-                "mainImage",
-                "subImage",
-                "title",
-                "subText",
-              ],
+              required: ["imageUrl", "caption"],
               additionalProperties: false,
               properties: {
-                mainImage: { type: "string", minLength: 1 },
-                mainImagePublicId: { type: "string" }, // ✅
-
-                subImage: { type: "string", minLength: 1 },
-                subImagePublicId: { type: "string" }, // ✅
-
-                title: { type: "string", minLength: 1 },
-                subText: { type: "string", minLength: 1 },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
+                imageUrl: { type: "string", minLength: 1 },
+                imagePublicId: { type: ["string", "null"] },
+                caption: { type: "string", minLength: 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 },
 
 
 
-/* ================= BUSINESS SETUP OPTIONS ================= */
 {
   if: {
-    properties: { type: { const: "BUSINESS_SETUP_OPTIONS" } },
+    properties: { type: { const: "FUTURE_OUTLOOK" } },
   },
   then: {
     properties: {
       content: {
         type: "object",
-        required: ["heading", "description", "options"],
+        required: ["heading", "slides"],
         additionalProperties: false,
         properties: {
           heading: { type: "string", minLength: 1 },
-          description: { type: "string", minLength: 1 },
-
-          options: {
-            type: "array",
-            minItems: 1,
-            items: {
-              type: "object",
-              required: ["title", "link"],
-              additionalProperties: false,
-              properties: {
-                title: { type: "string", minLength: 1 },
-                link: { type: "string", minLength: 1 },
-             
-              },
-            },
-          },
-
-          decisionFlow: { type: "string" },   // ✅ optional
-          bottomText: { type: "string" },     // ✅ optional
-        },
-      },
-    },
-  },
-},
-
-
-{
-  if: {
-    properties: { type: { const: "INFRASTRUCTURE" } },
-  },
-  then: {
-    properties: {
-      content: {
-        type: "object",
-        required: ["heading", "description", "slides"],
-        additionalProperties: false,
-        properties: {
-          heading: { type: "string", minLength: 1 },
-          description: { type: "string", minLength: 1 },
 
           slides: {
             type: "array",
             minItems: 1,
             items: {
               type: "object",
-              required: ["imageUrl", "title", "text"],
+              required: [
+                "title",
+                "description",
+                "imageUrl",
+                "ctaText",
+                "ctaLink"
+              ],
               additionalProperties: false,
               properties: {
+                title: { type: "string", minLength: 1 },
+                description: { type: "string", minLength: 1 },
                 imageUrl: { type: "string", minLength: 1 },
                 imagePublicId: { type: "string" },
-                title: { type: "string", minLength: 1 },
-                text: { type: "string", minLength: 1 },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-},
-
-
-
-
-/* ---------- NATURE PARKS ---------- */
-
-
-
+                ctaText: { type: "string", minLength: 1 },
+                ctaLink: { type: "string", minLength: 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 
 

@@ -60,25 +60,28 @@ export const CityBlogService = {
   /* ======================================================
      INTERNAL – EXTRACT MEDIA PUBLIC IDS
   ====================================================== */
-  extractPublicIds(sections: any[] = []) {
-    const publicIds: string[] = [];
+extractPublicIds(sections: any[] = []) {
+  const publicIds: string[] = [];
 
-    for (const section of sections) {
-      const content = section.content;
+  for (const section of sections) {
+    if (!section?.content) continue;
 
-      if (section.type === "HERO") {
+    const content = section.content;
+
+    switch (section.type) {
+      case "HERO":
         if (content.backgroundImagePublicId) {
           publicIds.push(content.backgroundImagePublicId);
         }
-      }
+        break;
 
-      if (section.type === "VISION") {
+      case "VISION":
         if (content.imagePublicId) {
           publicIds.push(content.imagePublicId);
         }
-      }
+        break;
 
-      if (section.type === "INVESTMENT_HIGHLIGHTS") {
+      case "INVESTMENT_HIGHLIGHTS":
         content.cards?.forEach((card: any) => {
           if (card.mainImagePublicId) {
             publicIds.push(card.mainImagePublicId);
@@ -87,11 +90,62 @@ export const CityBlogService = {
             publicIds.push(card.subImagePublicId);
           }
         });
-      }
-    }
+        break;
 
-    return publicIds;
-  },
+      case "INFRASTRUCTURE":
+        content.slides?.forEach((slide: any) => {
+          if (slide.imagePublicId) {
+            publicIds.push(slide.imagePublicId);
+          }
+        });
+        break;
+
+      case "FOOD_GUIDE":
+        content.filters?.forEach((filter: any) => {
+          filter.items?.forEach((item: any) => {
+            if (item.imagePublicId) {
+              publicIds.push(item.imagePublicId);
+            }
+          });
+        });
+        break;
+
+      case "TRANSPORTATION_GUIDE":
+        // Adjust property name if needed (routes/options/items etc.)
+        content.items?.forEach((item: any) => {
+          if (item.imagePublicId) {
+            publicIds.push(item.imagePublicId);
+          }
+        });
+
+     
+
+        break;
+
+         case "EXPANDABLE_SNAPSHOT":
+        content.cards?.forEach((card: any) => {
+          if (card.imagePublicId) {
+            publicIds.push(card.imagePublicId);
+          }
+        });
+        break;
+
+            case "FUTURE_OUTLOOK":
+        content.slides?.forEach((slide: any) => {
+          if (slide.imagePublicId) {
+            publicIds.push(slide.imagePublicId);
+          }
+        });
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return publicIds;
+},
+
 
   /* ======================================================
      ADMIN – UPSERT (SAFE + CLEANUP)

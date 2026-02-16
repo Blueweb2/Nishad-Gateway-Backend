@@ -14,16 +14,11 @@ export interface ICitySection {
     |"BUSINESS_SETUP_OPTIONS"
     | "INVESTMENT_HIGHLIGHTS"
     | "INFRASTRUCTURE"
-    | "FEATURE_CARDS"
-    | "STATS"
-    | "IMAGE_TEXT"
-    | "BUSINESS"
-    | "LIFESTYLE"
-    | "STEPS"
-    | "INFRASTRUCTURE"
-    | "PLACES_GRID"
-    | "FAQ"
-    | "CTA";
+    | "LANDMARKS"
+    | "FOOD_GUIDE"
+    | "TRANSPORTATION_GUIDE"
+    | "EXPANDABLE_SNAPSHOT"
+    | "FUTURE_OUTLOOK";
 
   title?: string;
   content: any;
@@ -60,16 +55,11 @@ const CitySectionSchema = new Schema<ICitySection>({
       "INVESTMENT_HIGHLIGHTS",
       "INFRASTRUCTURE",
       "BUSINESS_SETUP_OPTIONS", 
-      "FEATURE_CARDS",
-      "STATS",
-      "IMAGE_TEXT",
-      "BUSINESS",
-      "LIFESTYLE",
-      "STEPS",
-      "INFRASTRUCTURE",
-      "PLACES_GRID",
-      "FAQ",
-      "CTA",
+      "LANDMARKS",
+      "FOOD_GUIDE",
+      "TRANSPORTATION_GUIDE",
+      "EXPANDABLE_SNAPSHOT",
+      "FUTURE_OUTLOOK",
     ],
   },
 
