@@ -78,7 +78,7 @@ export const refreshAdminTokenService = async (
       role: decoded.role, // ✅ FIXED
       type: "access",
     },
-    { expiresIn: "15m" }
+    { expiresIn: "50m" }
   );
 
   return {

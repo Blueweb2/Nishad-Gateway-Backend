@@ -13,7 +13,7 @@ export const createAdminTokens = (
       role: admin.role,   // ✅ USE REAL ROLE
       type: "access",
     },
-    { expiresIn: "15m" }
+    { expiresIn: "50m" }
   );
 
   const refreshToken = app.jwt.sign(
@@ -42,7 +42,7 @@ export const getCookieOptions = (
     secure: isProd,
     maxAge:
       type === "access"
-        ? 60 * 15
+        ? 60 * 50
         : 60 * 60 * 24 * 7,
   };
 };
