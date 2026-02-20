@@ -5,9 +5,14 @@ import routes from "./routes/index";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
 import multipart from "@fastify/multipart";
+import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
 
-import fastifyStatic from "@fastify/static";
-import path from "path";
+
+
+
+// import fastifyStatic from "@fastify/static";
+// import path from "path";
 import { env } from "./config/env";
 
 export const buildApp = async () => {
@@ -44,13 +49,21 @@ await app.register(fastifyJwt, {
   });
 
   //  5) static uploads
-  await app.register(fastifyStatic, {
-    root: path.join(process.cwd(), "uploads"),
-    prefix: "/uploads/",
-  });
+  // await app.register(fastifyStatic, {
+  //   root: path.join(process.cwd(), "uploads"),
+  //   prefix: "/uploads/",
+  // });
 
   //  6) routes
   await app.register(routes, { prefix: "/api" });
 
+  
+await app.register(helmet);
+
+
+await app.register(rateLimit, {
+  max: 100,
+  timeWindow: "1 minute",
+});
   return app;
 };

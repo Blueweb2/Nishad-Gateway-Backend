@@ -1,20 +1,39 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import mongoose from "mongoose";
-import { CityBlogPostModel } from "../models/cityBlogPost.model";
-import { CityModel } from "../models/City.model";
-import { CityCategoryModel } from "../models/cityCategory.model";
+import { CityBlogPostService } from "../services/cityBlogPost.service";
 
 export const CityBlogPostController = {
+  /* ======================================================
+     PUBLIC – CATEGORY BLOG LIST
+  ====================================================== */
+  async getPublicCategoryBlogs(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { citySlug, categorySlug } =
+        req.params as { citySlug: string; categorySlug: string };
+
+      const result =
+        await CityBlogPostService.getPublicCategoryBlogs(
+          citySlug,
+          categorySlug
+        );
+
+      if (!result) {
+        return reply.code(404).send({ message: "Not found" });
+      }
+
+      return reply.code(200).send(result);
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(500).send({
+        message: "Failed to load category blogs",
+      });
+    }
+  },
 
   /* ======================================================
-     PUBLIC – GET BLOG DETAIL
-     GET /public/cities/:citySlug/:categorySlug/:blogSlug
+     PUBLIC – BLOG DETAIL
   ====================================================== */
-
-  async getPublicBlogDetail(
-    req: FastifyRequest,
-    reply: FastifyReply
-  ) {
+  async getPublicBlogDetail(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { citySlug, categorySlug, blogSlug } =
         req.params as {
@@ -23,50 +42,20 @@ export const CityBlogPostController = {
           blogSlug: string;
         };
 
-      const city = await CityModel.findOne({
-        citySlug,
-        isActive: true,
-      }).lean();
+      const result =
+        await CityBlogPostService.getPublicBlogDetail(
+          citySlug,
+          categorySlug,
+          blogSlug
+        );
 
-      if (!city) {
-        return reply.code(404).send({ message: "City not found" });
+      if (!result) {
+        return reply.code(404).send({ message: "Not found" });
       }
 
-      const category = await CityCategoryModel.findOne({
-        cityId: city._id,
-        slug: categorySlug,
-        isActive: true,
-      }).lean();
-
-      if (!category) {
-        return reply.code(404).send({ message: "Category not found" });
-      }
-
-      const blog = await CityBlogPostModel.findOne({
-        cityId: city._id,
-        categoryId: category._id,
-        slug: blogSlug,
-        isPublished: true,
-      }).lean();
-
-      if (!blog) {
-        return reply.code(404).send({ message: "Blog not found" });
-      }
-
-      return reply.code(200).send({
-        city: {
-          cityName: city.cityName,
-          citySlug: city.citySlug,
-        },
-        category: {
-          name: category.name,
-          slug: category.slug,
-        },
-        blog,
-      });
-
+      return reply.code(200).send(result);
     } catch (err) {
-      console.error("Public blog detail error:", err);
+      req.log.error(err);
       return reply.code(500).send({
         message: "Failed to load blog",
       });
@@ -76,43 +65,33 @@ export const CityBlogPostController = {
   /* ======================================================
      ADMIN – CREATE BLOG
   ====================================================== */
-
-  async create(
-    req: FastifyRequest,
-    reply: FastifyReply
-  ) {
+  async create(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { cityId, categoryId } =
         req.params as { cityId: string; categoryId: string };
 
-      const body = req.body as any;
-
-      if (
-        !mongoose.Types.ObjectId.isValid(cityId) ||
-        !mongoose.Types.ObjectId.isValid(categoryId)
-      ) {
-        return reply.code(400).send({ message: "Invalid ID" });
-      }
-
-      const blog = await CityBlogPostModel.create({
-        ...body,
-        cityId: new mongoose.Types.ObjectId(cityId),
-        categoryId: new mongoose.Types.ObjectId(categoryId),
-      });
+      const blog = await CityBlogPostService.create(
+        cityId,
+        categoryId,
+        req.body
+      );
 
       return reply.code(201).send({
         message: "Blog created successfully",
         blog,
       });
-
     } catch (err: any) {
       if (err.code === 11000) {
         return reply.code(400).send({
-          message: "Blog slug already exists for this city",
+          message: "Blog slug already exists in this category",
         });
       }
 
-      console.error("Create blog error:", err);
+      if (err.message?.includes("Invalid")) {
+        return reply.code(400).send({ message: err.message });
+      }
+
+      req.log.error(err);
       return reply.code(500).send({
         message: "Failed to create blog",
       });
@@ -122,41 +101,30 @@ export const CityBlogPostController = {
   /* ======================================================
      ADMIN – UPDATE BLOG
   ====================================================== */
-
-  async update(
-    req: FastifyRequest,
-    reply: FastifyReply
-  ) {
+  async update(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { blogId } =
-        req.params as { blogId: string };
+      const { cityId, categoryId, blogId } =
+        req.params as {
+          cityId: string;
+          categoryId: string;
+          blogId: string;
+        };
 
-      const body = req.body as any;
-
-      if (!mongoose.Types.ObjectId.isValid(blogId)) {
-        return reply.code(400).send({ message: "Invalid blog ID" });
-      }
-
-      const updated = await CityBlogPostModel.findByIdAndUpdate(
+      const updated = await CityBlogPostService.update(
+        cityId,
+        categoryId,
         blogId,
-        body,
-        {
-          new: true,
-          runValidators: true,
-        }
+        req.body
       );
 
       if (!updated) {
-        return reply.code(404).send({
-          message: "Blog not found",
-        });
+        return reply.code(404).send({ message: "Blog not found" });
       }
 
       return reply.code(200).send({
         message: "Blog updated successfully",
         blog: updated,
       });
-
     } catch (err: any) {
       if (err.code === 11000) {
         return reply.code(400).send({
@@ -164,7 +132,11 @@ export const CityBlogPostController = {
         });
       }
 
-      console.error("Update blog error:", err);
+      if (err.message?.includes("Invalid")) {
+        return reply.code(400).send({ message: err.message });
+      }
+
+      req.log.error(err);
       return reply.code(500).send({
         message: "Failed to update blog",
       });
@@ -172,39 +144,95 @@ export const CityBlogPostController = {
   },
 
   /* ======================================================
-     ADMIN – DELETE BLOG (HARD DELETE)
+     ADMIN – DELETE BLOG
   ====================================================== */
-
-  async remove(
-    req: FastifyRequest,
-    reply: FastifyReply
-  ) {
+  async remove(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { blogId } =
-        req.params as { blogId: string };
+      const { cityId, categoryId, blogId } =
+        req.params as {
+          cityId: string;
+          categoryId: string;
+          blogId: string;
+        };
 
-      if (!mongoose.Types.ObjectId.isValid(blogId)) {
-        return reply.code(400).send({ message: "Invalid blog ID" });
-      }
-
-      const deleted = await CityBlogPostModel.findByIdAndDelete(blogId);
+      const deleted = await CityBlogPostService.remove(
+        cityId,
+        categoryId,
+        blogId
+      );
 
       if (!deleted) {
-        return reply.code(404).send({
-          message: "Blog not found",
-        });
+        return reply.code(404).send({ message: "Blog not found" });
       }
 
       return reply.code(200).send({
         message: "Blog deleted successfully",
       });
+    } catch (err: any) {
+      if (err.message?.includes("Invalid")) {
+        return reply.code(400).send({ message: err.message });
+      }
 
-    } catch (err) {
-      console.error("Delete blog error:", err);
+      req.log.error(err);
       return reply.code(500).send({
         message: "Failed to delete blog",
       });
     }
   },
 
+  /* ======================================================
+     ADMIN – GET BLOGS BY CATEGORY
+  ====================================================== */
+  async getByCategoryAdmin(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { cityId, categoryId } =
+        req.params as { cityId: string; categoryId: string };
+
+      const blogs =
+        await CityBlogPostService.getByCategoryAdmin(
+          cityId,
+          categoryId
+        );
+
+      return reply.code(200).send({ blogs });
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(500).send({
+        message: "Failed to load blogs",
+      });
+    }
+  },
+
+  /* ======================================================
+     ADMIN – GET SINGLE BLOG
+  ====================================================== */
+  async getSingleAdmin(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { cityId, categoryId, blogId } =
+        req.params as {
+          cityId: string;
+          categoryId: string;
+          blogId: string;
+        };
+
+      const blog = await CityBlogPostService.getById(
+        cityId,
+        categoryId,
+        blogId
+      );
+
+      if (!blog) {
+        return reply.code(404).send({
+          message: "Blog not found",
+        });
+      }
+
+      return reply.code(200).send({ blog });
+    } catch (err) {
+      req.log.error(err);
+      return reply.code(500).send({
+        message: "Failed to load blog",
+      });
+    }
+  },
 };

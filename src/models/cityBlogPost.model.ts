@@ -139,24 +139,22 @@ const CityBlogPostSchema = new Schema<ICityBlogPost>(
    INDEXES
 ====================================================== */
 
-// Prevent duplicate slug inside same city
+/* ======================================================
+   INDEXES
+====================================================== */
+
+// Unique slug per category inside a city
 CityBlogPostSchema.index(
-  { cityId: 1, slug: 1 },
+  { cityId: 1, categoryId: 1, slug: 1 },
   { unique: true }
 );
 
-// Optimize category listing
+// Fast category listing
 CityBlogPostSchema.index({ categoryId: 1, isPublished: 1 });
 
-// Optimize blog lookup
-CityBlogPostSchema.index({
-  cityId: 1,
-  categoryId: 1,
-  slug: 1,
-});
-
-// Optimize published sorting
+// Fast published sorting
 CityBlogPostSchema.index({ isPublished: 1, createdAt: -1 });
+
 
 /* ======================================================
    PRE SAVE HOOK – AUTO CALCULATE READING TIME

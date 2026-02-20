@@ -4,8 +4,46 @@ import { CityModel } from "../models/City.model";
 import { CityCategoryModel } from "../models/cityCategory.model";
 import { CityBlogPostModel } from "../models/cityBlogPost.model";
 import { deleteCloudinaryImageService } from "./cloudinary.service";
+import DOMPurify from "isomorphic-dompurify";
 
 type BlogStatus = "DRAFT" | "PUBLISHED";
+function sanitizeRichText(html?: string) {
+  if (!html) return html;
+
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      "p", "b", "strong", "i", "em",
+      "ul", "ol", "li",
+      "h1", "h2", "h3", "h4",
+      "blockquote",
+      "a", "br", "span"
+    ],
+    ALLOWED_ATTR: ["href", "target", "rel"],
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    FORBID_ATTR: ["style", "onclick"],
+  });
+}
+
+
+function deepSanitize(value: any): any {
+  if (typeof value === "string") {
+    return sanitizeRichText(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(deepSanitize);
+  }
+
+  if (typeof value === "object" && value !== null) {
+    const newObj: any = {};
+    for (const key in value) {
+      newObj[key] = deepSanitize(value[key]);
+    }
+    return newObj;
+  }
+
+  return value;
+}
 
 export const CityBlogService = {
 
@@ -150,83 +188,98 @@ extractPublicIds(sections: any[] = []) {
   /* ======================================================
      ADMIN – UPSERT (SAFE + CLEANUP)
   ====================================================== */
-  async upsert(
-    cityId: string,
-    sections?: any[],
-    status?: BlogStatus
-  ) {
-    if (!mongoose.Types.ObjectId.isValid(cityId)) {
-      throw new Error("Invalid cityId");
+async upsert(
+  cityId: string,
+  sections?: any[],
+  status?: BlogStatus
+) {
+  if (!mongoose.Types.ObjectId.isValid(cityId)) {
+    throw new Error("Invalid cityId");
+  }
+
+  const objectCityId = new mongoose.Types.ObjectId(cityId);
+
+  // 🔥 Get existing blog BEFORE update
+  const existingBlog = await CityBlogModel.findOne({
+    cityId: objectCityId,
+  }).lean();
+
+  const oldPublicIds = this.extractPublicIds(existingBlog?.sections || []);
+
+  const updateData: any = {};
+
+  /* ======================================================
+     VALIDATE + SANITIZE + NORMALIZE SECTIONS
+  ====================================================== */
+  if (sections !== undefined) {
+    this.validateSections(sections, status);
+
+    // 🔐 Deep sanitize entire content object (future-proof)
+    const sanitizedSections = sections.map((section) => ({
+      ...section,
+      content: deepSanitize(section.content),
+    }));
+
+    // 📊 Normalize order
+    const normalizedSections = [...sanitizedSections]
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map((section, index) => ({
+        ...section,
+        order: index + 1,
+      }));
+
+    updateData.sections = normalizedSections;
+  }
+
+  /* ======================================================
+     VALIDATE PUBLISH WITHOUT SECTION UPDATE
+  ====================================================== */
+  if (status === "PUBLISHED" && sections === undefined) {
+    if (!existingBlog?.sections?.length) {
+      throw new Error("Cannot publish blog without sections");
     }
 
-    const objectCityId = new mongoose.Types.ObjectId(cityId);
+    this.validateSections(existingBlog.sections, "PUBLISHED");
+  }
 
-    // 🔥 Get existing blog BEFORE update
-    const existingBlog = await CityBlogModel.findOne({
-      cityId: objectCityId,
-    }).lean();
+  if (status !== undefined) {
+    updateData.status = status;
+  }
 
-    const oldPublicIds = this.extractPublicIds(existingBlog?.sections || []);
-
-    const updateData: any = {};
-
-    /* ===== Validate & Normalize Sections ===== */
-    if (sections !== undefined) {
-      this.validateSections(sections, status);
-
-      const normalizedSections = [...sections]
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((section, index) => ({
-          ...section,
-          order: index + 1,
-        }));
-
-      updateData.sections = normalizedSections;
+  /* ======================================================
+     UPDATE / UPSERT BLOG
+  ====================================================== */
+  const updatedBlog = await CityBlogModel.findOneAndUpdate(
+    { cityId: objectCityId },
+    { $set: updateData },
+    {
+      upsert: true,
+      new: true,
+      runValidators: true,
     }
+  ).lean();
 
-    /* ===== Publish Without Sections Update ===== */
-    if (status === "PUBLISHED" && sections === undefined) {
-      if (!existingBlog?.sections?.length) {
-        throw new Error("Cannot publish blog without sections");
+  /* ======================================================
+     CLEANUP UNUSED CLOUDINARY IMAGES
+  ====================================================== */
+  if (sections !== undefined) {
+    const newPublicIds = this.extractPublicIds(updatedBlog?.sections || []);
+
+    const removedPublicIds = oldPublicIds.filter(
+      (id) => !newPublicIds.includes(id)
+    );
+
+    for (const publicId of removedPublicIds) {
+      try {
+        await deleteCloudinaryImageService(publicId);
+      } catch (err) {
+        console.error("Cloudinary cleanup failed:", publicId);
       }
-
-      this.validateSections(existingBlog.sections, "PUBLISHED");
     }
+  }
 
-    if (status !== undefined) {
-      updateData.status = status;
-    }
-
-    const updatedBlog = await CityBlogModel.findOneAndUpdate(
-      { cityId: objectCityId },
-      { $set: updateData },
-      {
-        upsert: true,
-        new: true,
-        runValidators: true,
-      }
-    ).lean();
-
-    /* ===== CLEANUP UNUSED IMAGES ===== */
-    if (sections !== undefined) {
-      const newPublicIds = this.extractPublicIds(updatedBlog?.sections || []);
-
-      const removedPublicIds = oldPublicIds.filter(
-        (id) => !newPublicIds.includes(id)
-      );
-
-      for (const publicId of removedPublicIds) {
-        try {
-          await deleteCloudinaryImageService(publicId);
-        } catch (err) {
-          console.error("Cloudinary cleanup failed:", publicId);
-        }
-      }
-    }
-
-    return updatedBlog;
-  },
-
+  return updatedBlog;
+},
   /* ======================================================
      PUBLIC – CITY PAGE
   ====================================================== */

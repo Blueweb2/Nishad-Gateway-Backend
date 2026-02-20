@@ -6,6 +6,7 @@ import { slugSchema } from "./common.slug";
 
 export const createCityBlogPostSchema = {
   type: "object",
+  additionalProperties: false,
   required: ["title", "slug", "content"],
   properties: {
     title: { type: "string", minLength: 3 },
@@ -13,10 +14,10 @@ export const createCityBlogPostSchema = {
     excerpt: { type: "string", maxLength: 300 },
     content: { type: "string", minLength: 10 },
 
-    coverImage: { type: "string" },
+    coverImage: { type: "string", format: "uri" },
     gallery: {
       type: "array",
-      items: { type: "string" },
+      items: { type: "string", format: "uri" },
     },
 
     metaTitle: { type: "string", maxLength: 70 },
@@ -25,12 +26,13 @@ export const createCityBlogPostSchema = {
       type: "array",
       items: { type: "string" },
     },
-    canonicalUrl: { type: "string" },
-    ogImage: { type: "string" },
+    canonicalUrl: { type: "string", format: "uri" },
+    ogImage: { type: "string", format: "uri" },
 
     isPublished: { type: "boolean" },
   },
 };
+
 
 /* ======================================================
    UPDATE BLOG POST (ADMIN)

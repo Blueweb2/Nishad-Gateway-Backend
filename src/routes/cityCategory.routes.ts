@@ -11,80 +11,81 @@ import {
   updateCityCategoryBodySchema,
 } from "../schemas/cityCategory.schema";
 
+import type {
+  CityIdParams,
+  CityCategoryParams
+} from "../types/routes.types";
+
 export default async function cityCategoryRoutes(app: FastifyInstance) {
 
-  /* ========================================
-     PUBLIC ROUTE
-     Get categories by city
-  ======================================== */
-  app.get(
+  /* ================= PUBLIC ================= */
+
+  app.get<{ Params: CityIdParams }>(
     "/cities/:cityId/categories",
     { schema: { params: cityIdParamSchema } },
     CityCategoryController.getByCityId
   );
 
-  /* ========================================
-     PUBLIC ROUTE
-     Get single category
-  ======================================== */
-  app.get(
+  app.get<{ Params: CityCategoryParams }>(
     "/cities/:cityId/categories/:categoryId",
     { schema: { params: categoryIdParamSchema } },
     CityCategoryController.getById
   );
 
-  /* ========================================
-     ADMIN ROUTES (PROTECTED)
-  ======================================== */
+  /* ================= ADMIN ================= */
 
- /* ========================================
-   ADMIN ROUTES (PROTECTED)
-======================================== */
-
-// GET ALL (ADMIN)
-app.get(
-  "/admin/cities/:cityId/categories",
-  {
-    preHandler: [auth, adminOnly],
-    schema: { params: cityIdParamSchema },
-  },
-  CityCategoryController.getByCityId
-);
-
-// CREATE
-app.post(
-  "/admin/cities/:cityId/categories",
-  {
-    preHandler: [auth, adminOnly],
-    schema: {
-      params: cityIdParamSchema,
-      body: createCityCategoryBodySchema,
+  app.get<{ Params: CityIdParams }>(
+    "/admin/cities/:cityId/categories",
+    {
+      preHandler: [auth, adminOnly],
+      schema: { params: cityIdParamSchema },
     },
-  },
-  CityCategoryController.create
-);
+    CityCategoryController.getByCityId
+  );
 
-// UPDATE
-app.put(
-  "/admin/cities/:cityId/categories/:categoryId",
-  {
-    preHandler: [auth, adminOnly],
-    schema: {
-      params: categoryIdParamSchema,
-      body: updateCityCategoryBodySchema,
+  app.get<{ Params: CityCategoryParams }>(
+    "/admin/cities/:cityId/categories/:categoryId",
+    {
+      preHandler: [auth, adminOnly],
+      schema: { params: categoryIdParamSchema },
     },
-  },
-  CityCategoryController.update
-);
+    CityCategoryController.getById
+  );
 
-// DELETE
-app.delete(
-  "/admin/cities/:cityId/categories/:categoryId",
-  {
-    preHandler: [auth, adminOnly],
-    schema: { params: categoryIdParamSchema },
-  },
-  CityCategoryController.remove
-);
+  app.post<{
+    Params: CityIdParams;
+  }>(
+    "/admin/cities/:cityId/categories",
+    {
+      preHandler: [auth, adminOnly],
+      schema: {
+        params: cityIdParamSchema,
+        body: createCityCategoryBodySchema,
+      },
+    },
+    CityCategoryController.create
+  );
 
+  app.put<{
+    Params: CityCategoryParams;
+  }>(
+    "/admin/cities/:cityId/categories/:categoryId",
+    {
+      preHandler: [auth, adminOnly],
+      schema: {
+        params: categoryIdParamSchema,
+        body: updateCityCategoryBodySchema,
+      },
+    },
+    CityCategoryController.update
+  );
+
+  app.delete<{ Params: CityCategoryParams }>(
+    "/admin/cities/:cityId/categories/:categoryId",
+    {
+      preHandler: [auth, adminOnly],
+      schema: { params: categoryIdParamSchema },
+    },
+    CityCategoryController.remove
+  );
 }

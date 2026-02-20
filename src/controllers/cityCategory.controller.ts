@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import mongoose from "mongoose";
 import { CityCategoryService } from "../services/cityCategory.service";
 import { CityCategoryParams } from "../types/routes.types";
+import { CityCategoryModel } from "../models/cityCategory.model";
 
 export const CityCategoryController = {
 
@@ -179,4 +180,32 @@ async getById(
       });
     }
   },
+
+//   async getSingleCategory(req: FastifyRequest, reply: FastifyReply) {
+//   try {
+//     const { cityId, categoryId } =
+//       req.params as { cityId: string; categoryId: string };
+
+//     const category = await CityCategoryModel.findOne({
+//       _id: categoryId,
+//       cityId,
+//     }).lean();
+
+//     if (!category) {
+//       return reply.code(404).send({
+//         message: "Category not found",
+//       });
+//     }
+
+//     return reply.code(200).send({
+//       category,
+//     });
+//   } catch (err) {
+//     req.log.error(err);
+//     return reply.code(500).send({
+//       message: "Failed to load category",
+//     });
+//   }
+// }
+
 };

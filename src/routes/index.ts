@@ -34,11 +34,13 @@ export default async function routes(app: FastifyInstance) {
     app.register(cityCategoryRoutes)
     app.register(cityBlogPostRoutes);
 
+ 
+
 
 
  app.register(uploadRoutes, { prefix: "/upload" });
 
-await app.register(mediaCleanupRoutes, { prefix: "/api" });
+await app.register(mediaCleanupRoutes);
 
   app.register(leadRoutes);
 

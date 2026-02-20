@@ -53,14 +53,11 @@ export default async function cityBlogRoutes(app: FastifyInstance) {
 
   /* ================= PUBLIC CATEGORY ================= */
 
-app.get(
-  "/cities/:citySlug/:categorySlug",
-  CityPublicBlogController.getCategoryBlogs
-);
+// app.get(
+//   "/cities/:citySlug/:categorySlug",
+//   CityPublicBlogController.getCategoryBlogs
+// );
 
-app.get(
-  "/cities/:citySlug/:categorySlug/:blogSlug",
-  CityPublicBlogController.getSingleBlog
-);
+
 
 }
