@@ -21,8 +21,8 @@ export default async function routes(app: FastifyInstance) {
   app.register(adminRoutes);
   
 
-  // Blog
-  app.register(blogRoutes);
+ // Blog
+  app.register(blogRoutes, { prefix: "/blogs" });
 
   // Services module
   app.register(serviceRoutes);

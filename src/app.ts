@@ -15,6 +15,7 @@ import rateLimit from "@fastify/rate-limit";
 // import path from "path";
 import { env } from "./config/env";
 
+
 export const buildApp = async () => {
   const app = Fastify({ logger: true });
 
@@ -57,7 +58,7 @@ await app.register(fastifyJwt, {
   //  6) routes
   await app.register(routes, { prefix: "/api" });
 
-  
+ 
 await app.register(helmet);
 
 
