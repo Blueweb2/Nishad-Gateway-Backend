@@ -6,22 +6,17 @@ import { CreateBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 
 export default async function blogRoutes(app: FastifyInstance) {
 
-  /* ================= PUBLIC ================= */
-
-app.get<{
-  Querystring: { page?: string; limit?: string; tag?: string };
-}>("/", BlogController.getAll);
-
-  app.get<{
-    Params: { slug: string };
-  }>("/:slug", BlogController.getSingle);
-
-
   /* ================= ADMIN ================= */
 
   app.get("/admin/all", {
     preHandler: [auth, adminOnly],
   }, BlogController.getAdmin);
+
+  app.get<{
+    Params: { id: string };
+  }>("/admin/:id", {
+    preHandler: [auth, adminOnly],
+  }, BlogController.getById);
 
   app.post<{
     Body: CreateBlogDTO;
@@ -41,4 +36,14 @@ app.get<{
   }>("/admin/:id", {
     preHandler: [auth, adminOnly],
   }, BlogController.delete);
+
+  /* ================= PUBLIC ================= */
+
+  app.get<{
+    Querystring: { page?: string; limit?: string; tag?: string };
+  }>("/", BlogController.getAll);
+
+  app.get<{
+    Params: { slug: string };
+  }>("/:slug", BlogController.getSingle);
 }

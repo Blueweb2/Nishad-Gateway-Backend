@@ -201,6 +201,9 @@ export class BlogService {
     return updatedBlog;
   }
 
+
+
+
   /* ================= DELETE (SOFT) ================= */
 static async delete(id: string) {
 const blog = await BlogModel.findById(id);
@@ -241,5 +244,7 @@ const blog = await BlogModel.findById(id);
 
     return;
   }
+
+
 
 }

@@ -159,4 +159,28 @@ static async delete(
       });
     }
   }
+static async getById(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) {
+  const { id } = request.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return reply.status(400).send({
+      success: false,
+      message: "Invalid blog ID",
+    });
+  }
+
+  const blog = await BlogService.getById(id);
+
+  if (!blog) {
+    return reply.status(404).send({
+      success: false,
+      message: "Blog not found",
+    });
+  }
+
+  return reply.status(200).send(blog);
+}
 }
