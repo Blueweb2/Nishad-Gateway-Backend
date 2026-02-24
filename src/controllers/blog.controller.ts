@@ -129,12 +129,14 @@ static async getAll(
     }
   }
 
-  static async delete(
+static async delete(
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply
   ) {
     try {
       const { id } = request.params;
+
+      /* ================= VALIDATE OBJECT ID ================= */
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return reply.status(400).send({
@@ -147,8 +149,9 @@ static async getAll(
 
       return reply.status(200).send({
         success: true,
-        message: "Deleted successfully",
+        message: "Blog deleted successfully",
       });
+
     } catch (error: any) {
       return reply.status(400).send({
         success: false,

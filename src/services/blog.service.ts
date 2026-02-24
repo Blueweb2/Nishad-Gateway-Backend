@@ -1,6 +1,7 @@
 import { BlogModel } from "../models/blog.model";
 import slugify from "../utils/slugify";
 import { CreateBlogDTO, UpdateBlogDTO } from "../types/blog.types";
+import { deleteCloudinaryImageService } from "./cloudinary.service";
 
 /* ================= READING TIME ================= */
 
@@ -201,18 +202,44 @@ export class BlogService {
   }
 
   /* ================= DELETE (SOFT) ================= */
+static async delete(id: string) {
+const blog = await BlogModel.findById(id);
 
-  static async delete(id: string) {
-    const blog = await BlogModel.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true }
-    ).lean();
-
-    if (!blog) {
+    if (!blog || blog.isDeleted) {
       throw new Error("Blog not found");
     }
 
-    return blog;
+    /* ================= DELETE COVER IMAGE ================= */
+
+    if (blog.coverImage?.url) {
+      await deleteCloudinaryImageService(blog.coverImage.url);
+    }
+
+    /* ================= DELETE BLOCK IMAGES ================= */
+
+    for (const block of blog.blocks) {
+
+      // Single image block
+      if (block.type === "image" && block.data?.url) {
+        await deleteCloudinaryImageService(block.data.url);
+      }
+
+      // Gallery block (multiple images)
+      if (block.type === "gallery" && block.data?.images) {
+        for (const img of block.data.images) {
+          if (img.url) {
+            await deleteCloudinaryImageService(img.url);
+          }
+        }
+      }
+    }
+
+    /* ================= SOFT DELETE ================= */
+
+    blog.isDeleted = true;
+    await blog.save();
+
+    return;
   }
+
 }

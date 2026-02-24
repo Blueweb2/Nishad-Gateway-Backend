@@ -1,16 +1,20 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+import { BlogBlock } from "../types/blog.types";
+
 export type BlogStatus = "draft" | "published";
+
+/* ================= BLOG INTERFACE ================= */
 
 export interface IBlog extends Document {
   title: string;
   slug: string;
   excerpt: string;
 
-  blocks: {
-    type: string;
-    data: any;
-  }[];
+ blocks: {
+  type: string;
+  data: BlogBlock;
+}[];
 
   coverImage: {
     url: string;
@@ -86,6 +90,7 @@ const blogSchema = new Schema<IBlog>(
         type: String,
         required: true,
       },
+      publicId: { type: String },
     },
 
     tags: [

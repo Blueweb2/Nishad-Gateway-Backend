@@ -2,16 +2,26 @@ import cloudinary from "../config/cloudinary";
 import { env } from "../config/env";
 import { createError } from "../utils/errors";
 
-export const getSignedCloudinaryUploadParamsService = async (folder: string) => {
+export const getSignedCloudinaryUploadParamsService = async (
+  folder: string
+) => {
   try {
+    /* ================= VALIDATION ================= */
+
     if (!folder || folder.trim() === "") {
       throw createError(400, "Folder is required");
     }
 
-    // ✅ Timestamp must be seconds (Cloudinary requirement)
+    if (!env.CLOUDINARY_API_SECRET) {
+      throw createError(500, "Cloudinary API secret missing");
+    }
+
+    /* ================= TIMESTAMP ================= */
+    // Cloudinary requires seconds
     const timestamp = Math.floor(Date.now() / 1000);
 
-    // ✅ Cloudinary signature
+    /* ================= SIGNATURE ================= */
+
     const signature = cloudinary.utils.api_sign_request(
       {
         timestamp,
@@ -27,7 +37,11 @@ export const getSignedCloudinaryUploadParamsService = async (folder: string) => 
       timestamp,
       signature,
     };
+
   } catch (err: any) {
-    throw createError(err?.statusCode || 500, err?.message || "Signed upload failed");
+    throw createError(
+      err?.statusCode || 500,
+      err?.message || "Signed upload failed"
+    );
   }
 };
