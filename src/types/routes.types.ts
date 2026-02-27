@@ -1,4 +1,5 @@
 import { RouteGenericInterface } from "fastify";
+import { CreateSectorDTO, UpdateSectorDTO } from "./sector.types";
 
 /* =====================================================
    PARAM OBJECTS
@@ -81,3 +82,10 @@ export interface AdminLogsQuery {
 export interface AdminLogsRoute extends RouteGenericInterface {
   Querystring: AdminLogsQuery;
 }
+
+
+/* =====================================================
+   SECTOR ROUTE GENERICS
+===================================================== */
+
+

@@ -12,6 +12,7 @@ import cityBlogRoutes from "./cityBlog.routes";
 import cityCategoryRoutes from "./cityCategory.routes";
 import cityBlogPostRoutes from "./cityBlogPost.routes";
  import mediaCleanupRoutes from "./mediaCleanup.routes";
+import { sectorRoutes } from "./sector.routes";
 
 
 
@@ -33,6 +34,8 @@ export default async function routes(app: FastifyInstance) {
   app.register(cityBlogRoutes);
     app.register(cityCategoryRoutes)
     app.register(cityBlogPostRoutes);
+
+    app.register(sectorRoutes, { prefix: "/sectors" });
 
  
 
