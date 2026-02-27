@@ -4,35 +4,45 @@ export type BlogStatus = "draft" | "published";
 
 export type HeadingBlock = {
   type: "heading";
-  level: 1 | 2 | 3;
-  text: string;
+  data: {
+    level: 1 | 2 | 3;
+    text: string;
+  };
 };
 
 export type ParagraphBlock = {
   type: "paragraph";
-  text: string;
+  data: {
+    text: string;
+  };
 };
 
 export type ImageBlock = {
   type: "image";
-  url: string;
-  alt: string;
-  caption?: string;
+  data: {
+    url: string;
+    alt: string;
+    caption?: string;
+  };
 };
 
 export type GalleryBlock = {
   type: "gallery";
-  images: {
-    url: string;
-    alt?: string;
-    caption?: string;
-  }[];
+  data: {
+    images: {
+      url: string;
+      alt?: string;
+      caption?: string;
+    }[];
+  };
 };
 
 export type TableBlock = {
   type: "table";
-  headers: string[];
-  rows: string[][];
+  data: {
+    headers: string[];
+    rows: string[][];
+  };
 };
 
 export type BlogBlock =
@@ -46,7 +56,7 @@ export type BlogBlock =
 
 export interface CreateBlogDTO {
   title: string;
-  slug: string;
+  slug?: string; // ✅ Optional (auto-generated)
   excerpt: string;
 
   blocks: BlogBlock[];
@@ -58,6 +68,9 @@ export interface CreateBlogDTO {
 
   tags?: string[];
   status?: BlogStatus;
+
+  // ✅ Featured support
+  featuredPosition?: 1 | 2 | 3 | null;
 
   metaTitle?: string;
   metaDescription?: string;

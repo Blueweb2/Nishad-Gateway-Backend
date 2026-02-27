@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-
 import { BlogBlock } from "../types/blog.types";
 
 export type BlogStatus = "draft" | "published";
@@ -11,18 +10,19 @@ export interface IBlog extends Document {
   slug: string;
   excerpt: string;
 
- blocks: {
-  type: string;
-  data: BlogBlock;
-}[];
+  blocks: BlogBlock[];
 
   coverImage: {
     url: string;
     alt: string;
+    publicId?: string;
   };
 
   tags: string[];
   status: BlogStatus;
+
+  // ✅ Featured system
+  featuredPosition: 1 | 2 | 3 | null;
 
   metaTitle?: string;
   metaDescription?: string;
@@ -107,11 +107,24 @@ const blogSchema = new Schema<IBlog>(
       index: true,
     },
 
+    /* ================= FEATURED ================= */
+
+    featuredPosition: {
+      type: Number,
+      enum: [1, 2, 3, null],
+      default: null,
+      index: true,
+    },
+
+    /* ================= SEO ================= */
+
     metaTitle: String,
     metaDescription: String,
     metaKeywords: [String],
     ogImage: String,
     canonicalUrl: String,
+
+    /* ================= META ================= */
 
     readingTime: {
       type: Number,
@@ -132,8 +145,13 @@ const blogSchema = new Schema<IBlog>(
   { timestamps: true }
 );
 
+/* ================= INDEXES ================= */
+
+// For normal blog listing
 blogSchema.index({ status: 1, publishedAt: -1 });
-blogSchema.index({ tags: 1 });
+
+// For featured sorting
+blogSchema.index({ featuredPosition: 1 });
 
 export const BlogModel =
   mongoose.models.Blog ||

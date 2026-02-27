@@ -67,14 +67,28 @@ export class BlogService {
       throw new Error("Blocks are required");
     }
 
-    const slug = await generateUniqueSlug(data.slug || data.title);
+    const slug = await generateUniqueSlug(
+      data.slug || data.title
+    );
 
-    const readingTime = calculateReadingTimeFromBlocks(data.blocks);
+    const readingTime =
+      calculateReadingTimeFromBlocks(data.blocks);
+
+    /* ===== FEATURED HANDLING ===== */
+
+    if (data.featuredPosition) {
+      // Remove same position from other blogs
+      await BlogModel.updateMany(
+        { featuredPosition: data.featuredPosition },
+        { $set: { featuredPosition: null } }
+      );
+    }
 
     const blog = await BlogModel.create({
       ...data,
       slug,
       readingTime,
+      featuredPosition: data.featuredPosition ?? null,
       publishedAt:
         data.status === "published" ? new Date() : undefined,
     });
@@ -128,6 +142,17 @@ export class BlogService {
     }).lean();
   }
 
+  static async getFeatured() {
+    return BlogModel.find({
+      featuredPosition: { $ne: null },
+      status: "published",
+      isDeleted: false,
+    })
+      .sort({ featuredPosition: 1 })
+      .limit(3)
+      .lean();
+  }
+
   /* ================= ADMIN ================= */
 
   static async getAllAdmin() {
@@ -178,6 +203,40 @@ export class BlogService {
         calculateReadingTimeFromBlocks(data.blocks);
     }
 
+    /* ===== FEATURED HANDLING ===== */
+
+    if (data.featuredPosition !== undefined) {
+
+      // If assigning a position
+      if (data.featuredPosition !== null) {
+
+        // Ensure no duplicate position
+        await BlogModel.updateMany(
+          {
+            featuredPosition: data.featuredPosition,
+            _id: { $ne: id },
+          },
+          { $set: { featuredPosition: null } }
+        );
+
+        // Optional: enforce max 3 safeguard
+        const featuredCount =
+          await BlogModel.countDocuments({
+            featuredPosition: { $ne: null },
+            _id: { $ne: id },
+          });
+
+        if (featuredCount >= 3) {
+          throw new Error(
+            "Maximum 3 featured blogs allowed"
+          );
+        }
+      }
+
+      updatePayload.featuredPosition =
+        data.featuredPosition;
+    }
+
     /* ===== PUBLISH DATE ===== */
 
     if (
@@ -201,50 +260,27 @@ export class BlogService {
     return updatedBlog;
   }
 
-
-
-
   /* ================= DELETE (SOFT) ================= */
-static async delete(id: string) {
-const blog = await BlogModel.findById(id);
+
+  static async delete(id: string) {
+    const blog = await BlogModel.findById(id);
 
     if (!blog || blog.isDeleted) {
       throw new Error("Blog not found");
     }
 
-    /* ================= DELETE COVER IMAGE ================= */
+    /* ===== ASSET RETENTION ===== */
+    // Note: Since this is purely a soft delete (isDeleted = true), 
+    // Cloudinary images are intentionally NOT deleted to prevent breaking data
+    // should the blog ever be recovered.
 
-    if (blog.coverImage?.url) {
-      await deleteCloudinaryImageService(blog.coverImage.url);
-    }
+    /* ===== REMOVE FEATURED ===== */
 
-    /* ================= DELETE BLOCK IMAGES ================= */
+    blog.featuredPosition = null;
 
-    for (const block of blog.blocks) {
-
-      // Single image block
-      if (block.type === "image" && block.data?.url) {
-        await deleteCloudinaryImageService(block.data.url);
-      }
-
-      // Gallery block (multiple images)
-      if (block.type === "gallery" && block.data?.images) {
-        for (const img of block.data.images) {
-          if (img.url) {
-            await deleteCloudinaryImageService(img.url);
-          }
-        }
-      }
-    }
-
-    /* ================= SOFT DELETE ================= */
+    /* ===== SOFT DELETE ===== */
 
     blog.isDeleted = true;
     await blog.save();
-
-    return;
   }
-
-
-
 }

@@ -37,7 +37,11 @@ export default async function blogRoutes(app: FastifyInstance) {
     preHandler: [auth, adminOnly],
   }, BlogController.delete);
 
+
   /* ================= PUBLIC ================= */
+
+  // ✅ MUST COME BEFORE "/:slug"
+  app.get("/featured", BlogController.getFeatured);
 
   app.get<{
     Querystring: { page?: string; limit?: string; tag?: string };
