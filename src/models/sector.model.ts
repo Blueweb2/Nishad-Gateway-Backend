@@ -16,9 +16,18 @@ export interface ISector extends Document {
   coverImage: {
     url: string;
     alt: string;
+    publicId?: string;
   };
 
+  order: number;
   status: SectorStatus;
+
+  /* SEO */
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  ogImage?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,6 +68,13 @@ const SectorSchema = new Schema<ISector>(
     coverImage: {
       url: { type: String, required: true },
       alt: { type: String, required: true },
+      publicId: { type: String },
+    },
+
+    order: {
+      type: Number,
+      default: 0,
+      index: true,
     },
 
     status: {
@@ -66,6 +82,12 @@ const SectorSchema = new Schema<ISector>(
       enum: ["draft", "published"],
       default: "draft",
     },
+
+    /* SEO */
+    metaTitle: { type: String },
+    metaDescription: { type: String },
+    metaKeywords: [{ type: String }],
+    ogImage: { type: String },
   },
   { timestamps: true }
 );

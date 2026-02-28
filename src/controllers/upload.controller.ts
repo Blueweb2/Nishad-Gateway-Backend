@@ -14,6 +14,8 @@ export const getSignedUpload = async (
 ) => {
   try {
     const { folder } = req.query as { folder?: string };
+    
+console.log(folder,"folder");
 
     if (!folder || folder.trim() === "") {
       return sendResponse(reply, 400, false, "Folder is required", null);
@@ -35,11 +37,33 @@ export const getSignedUpload = async (
       "nishad-gateway/cities/transportation",
       "nishad-gateway/cities/snapshot",
       "nishad-gateway/cities/future-outlook",
+      "nishad-gateway/sectors/icons",
     ];
+
+    console.log("---- DEBUG START ----");
+console.log("Received:", JSON.stringify(cleanFolder));
+console.log("Length:", cleanFolder.length);
+
+console.log("THIS IS THE ACTIVE UPLOAD CONTROLLER");
+
+allowedFolders.forEach((f, i) => {
+  console.log(
+    `Allowed[${i}]:`,
+    JSON.stringify(f),
+    "Length:",
+    f.length,
+    "Match:",
+    f === cleanFolder
+  );
+});
+
+console.log("---- DEBUG END ----");
 
     if (!allowedFolders.includes(cleanFolder)) {
       return sendResponse(reply, 403, false, "Invalid folder", null);
     }
+    console.log("Allowed folders:", allowedFolders);
+console.log("Received:", cleanFolder);
 
     const signed = await getSignedCloudinaryUploadParamsService(cleanFolder);
 

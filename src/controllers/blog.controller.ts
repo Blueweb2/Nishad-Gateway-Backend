@@ -93,6 +93,29 @@ export class BlogController {
     }
   }
 
+  static async getRelated(
+  request: FastifyRequest<{ Params: { slug: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const { slug } = request.params;
+
+    const related =
+      await BlogService.getRelatedBySlug(slug);
+
+    return reply.status(200).send({
+      success: true,
+      data: related,
+    });
+
+  } catch (error) {
+    return reply.status(500).send({
+      success: false,
+      message: "Failed to fetch related blogs",
+    });
+  }
+}
+
   /* ================= ADMIN ================= */
 
   static async getAdmin(

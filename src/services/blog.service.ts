@@ -153,6 +153,38 @@ export class BlogService {
       .lean();
   }
 
+
+  /* ================= RELATED ================= */
+
+static async getRelatedBySlug(
+  slug: string,
+  limit: number = 3
+) {
+  // 1️⃣ Get current blog
+  const currentBlog = await BlogModel.findOne({
+    slug,
+    status: "published",
+    isDeleted: false,
+  }).lean();
+
+  if (!currentBlog) return [];
+
+  if (!currentBlog.tags || currentBlog.tags.length === 0) {
+    return [];
+  }
+
+  // 2️⃣ Find related blogs
+  return BlogModel.find({
+    _id: { $ne: currentBlog._id },
+    status: "published",
+    isDeleted: false,
+    tags: { $in: currentBlog.tags },
+  })
+    .sort({ publishedAt: -1 })
+    .limit(limit)
+    .lean();
+}
+
   /* ================= ADMIN ================= */
 
   static async getAllAdmin() {

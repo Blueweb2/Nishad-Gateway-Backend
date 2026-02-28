@@ -15,6 +15,7 @@ export const sectorBlockSchema = {
       additionalProperties: true,
     },
   },
+
 };
 
 /* ================= CREATE SECTOR ================= */
@@ -41,6 +42,7 @@ export const createSectorSchema = {
         properties: {
           url: { type: "string", format: "uri" },
           alt: { type: "string", minLength: 2 },
+          publicId: { type: "string" },
         },
       },
 
@@ -72,6 +74,7 @@ export const updateSectorSchema = {
         properties: {
           url: { type: "string", format: "uri" },
           alt: { type: "string", minLength: 2 },
+          publicId: { type: "string" },
         },
       },
 
@@ -79,6 +82,16 @@ export const updateSectorSchema = {
         type: "string",
         enum: ["draft", "published"],
       },
+
+      order: { type: "number", minimum: 0 },
+
+      metaTitle: { type: "string", minLength: 3 },
+      metaDescription: { type: "string", minLength: 10 },
+      metaKeywords: {
+        type: "array",
+        items: { type: "string" },
+      },
+      ogImage: { type: "string", format: "uri" },
     },
   },
 };

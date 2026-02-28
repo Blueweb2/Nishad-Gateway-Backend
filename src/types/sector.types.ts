@@ -1,5 +1,3 @@
-// sector.types.ts
-
 export type SectorStatus = "draft" | "published";
 
 export type SectorBlock =
@@ -12,11 +10,22 @@ export interface CreateSectorDTO {
   title: string;
   excerpt: string;
   blocks: SectorBlock[];
+
   coverImage: {
     url: string;
     alt: string;
+    publicId?: string;
   };
+
+  order?: number;
   status?: SectorStatus;
+
+  /* SEO */
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  ogImage?: string;
 }
 
-export interface UpdateSectorDTO extends Partial<CreateSectorDTO> {}
+export interface UpdateSectorDTO
+  extends Partial<CreateSectorDTO> {}

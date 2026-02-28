@@ -93,12 +93,11 @@ const blogSchema = new Schema<IBlog>(
       publicId: { type: String },
     },
 
-    tags: [
-      {
-        type: String,
-        index: true,
-      },
-    ],
+tags: {
+  type: [String],
+  default: [],
+  index: true,
+},
 
     status: {
       type: String,
