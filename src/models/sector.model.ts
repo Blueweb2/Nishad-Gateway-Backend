@@ -32,38 +32,30 @@ export interface ISector extends Document {
   updatedAt: Date;
 }
 
+const SectorBlockSchema = new Schema(
+  {
+    type: {
+      type: String,
+      required: true,
+    },
+    data: {
+      type: Schema.Types.Mixed,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const SectorSchema = new Schema<ISector>(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    title: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, unique: true, index: true },
+    excerpt: { type: String, required: true },
 
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
+    blocks: {
+      type: [SectorBlockSchema],
+      default: [],
     },
-
-    excerpt: {
-      type: String,
-      required: true,
-    },
-
-    blocks: [
-      {
-        type: {
-          type: String,
-          required: true,
-        },
-        data: {
-          type: Schema.Types.Mixed,
-          required: true,
-        },
-      },
-    ],
 
     coverImage: {
       url: { type: String, required: true },
@@ -71,19 +63,13 @@ const SectorSchema = new Schema<ISector>(
       publicId: { type: String },
     },
 
-    order: {
-      type: Number,
-      default: 0,
-      index: true,
-    },
-
+    order: { type: Number, default: 0, index: true },
     status: {
       type: String,
       enum: ["draft", "published"],
       default: "draft",
     },
 
-    /* SEO */
     metaTitle: { type: String },
     metaDescription: { type: String },
     metaKeywords: [{ type: String }],

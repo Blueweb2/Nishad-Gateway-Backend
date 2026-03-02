@@ -10,7 +10,12 @@ import {
 } from "../types/sector.routes.types";
 
 import { IdRoute } from "../types/common.routes.types";
-import { createSectorSchema } from "../schemas/sector.schema";
+
+import {
+  createSectorSchema,
+  updateSectorSchema,
+  sectorIdParamsSchema,
+} from "../schemas/sector.schema";
 
 export async function sectorRoutes(app: FastifyInstance) {
 
@@ -24,25 +29,40 @@ export async function sectorRoutes(app: FastifyInstance) {
 
   app.post<CreateSectorRoute>(
     "/admin",
-    { preHandler: [auth, adminOnly], schema: createSectorSchema },
+    {
+      preHandler: [auth, adminOnly],
+      schema: createSectorSchema,
+    },
     SectorController.createSector
   );
 
   app.get<IdRoute>(
     "/admin/:id",
-    { preHandler: [auth, adminOnly] },
+    {
+      preHandler: [auth, adminOnly],
+      schema: sectorIdParamsSchema,
+    },
     SectorController.getById
   );
 
   app.put<UpdateSectorRoute>(
     "/admin/:id",
-    { preHandler: [auth, adminOnly] },
+    {
+      preHandler: [auth, adminOnly],
+      schema: {
+        ...updateSectorSchema,
+        params: sectorIdParamsSchema.params,
+      },
+    },
     SectorController.updateSector
   );
 
   app.delete<IdRoute>(
     "/admin/:id",
-    { preHandler: [auth, adminOnly] },
+    {
+      preHandler: [auth, adminOnly],
+      schema: sectorIdParamsSchema,
+    },
     SectorController.deleteSector
   );
 

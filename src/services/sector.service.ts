@@ -52,9 +52,14 @@ export const updateSectorService = async (
   id: string,
   data: UpdateSectorDTO
 ) => {
-  let updatePayload: any = { ...data };
+  const sector = await SectorModel.findById(id);
 
-  if (data.title) {
+  if (!sector) {
+    throw new Error("Sector not found");
+  }
+
+  // Handle slug update
+  if (data.title && data.title !== sector.title) {
     const newSlug = slugify(data.title);
 
     const existing = await SectorModel.findOne({
@@ -66,20 +71,29 @@ export const updateSectorService = async (
       throw new Error("Another sector with this title already exists");
     }
 
-    updatePayload.slug = newSlug;
+    sector.title = data.title;
+    sector.slug = newSlug;
   }
 
-  const updated = await SectorModel.findByIdAndUpdate(
-    id,
-    updatePayload,
-    { new: true }
-  );
-
-  if (!updated) {
-    throw new Error("Sector not found");
+  if (data.blocks !== undefined) {
+    sector.blocks = data.blocks as any;
   }
 
-  return updated;
+  if (data.excerpt !== undefined) sector.excerpt = data.excerpt;
+  if (data.status !== undefined) sector.status = data.status;
+  if (data.order !== undefined) sector.order = data.order;
+  if (data.metaTitle !== undefined) sector.metaTitle = data.metaTitle;
+  if (data.metaDescription !== undefined)
+    sector.metaDescription = data.metaDescription;
+  if (data.metaKeywords !== undefined)
+    sector.metaKeywords = data.metaKeywords;
+  if (data.ogImage !== undefined) sector.ogImage = data.ogImage;
+  if (data.coverImage !== undefined)
+    sector.coverImage = data.coverImage;
+
+  await sector.save();
+
+  return sector;
 };
 /* ================= DELETE ================= */
 

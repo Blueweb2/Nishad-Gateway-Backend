@@ -4,8 +4,10 @@
 
 export const sectorBlockSchema = {
   type: "object",
+  additionalProperties: false,
   required: ["type", "data"],
   properties: {
+    _id: { type: "string" },   // ✅ allow uuid
     type: {
       type: "string",
       enum: ["hero", "richContent", "industries"],
@@ -15,7 +17,6 @@ export const sectorBlockSchema = {
       additionalProperties: true,
     },
   },
-
 };
 
 /* ================= CREATE SECTOR ================= */
@@ -91,8 +92,12 @@ export const updateSectorSchema = {
         type: "array",
         items: { type: "string" },
       },
-      ogImage: { type: "string", format: "uri" },
-    },
+ogImage: {
+  anyOf: [
+    { type: "string", format: "uri" },
+    { type: "string", maxLength: 0 }
+  ]
+},    },
   },
 };
 
