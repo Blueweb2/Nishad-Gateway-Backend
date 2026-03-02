@@ -29,9 +29,7 @@ export const getAllSectorsService = async (admin = false) => {
     return SectorModel.find().sort({ createdAt: -1 });
   }
 
-  return SectorModel.find({ status: "published" }).sort({
-    createdAt: -1,
-  });
+  return SectorModel.find({ status: "published" }).sort({ order: 1, createdAt: -1 })
 };
 
 /* ================= GET BY SLUG ================= */

@@ -38,6 +38,7 @@ console.log(folder,"folder");
       "nishad-gateway/cities/snapshot",
       "nishad-gateway/cities/future-outlook",
       "nishad-gateway/sectors/icons",
+      "nishad-gateway/sectors/hero",
     ];
 
     console.log("---- DEBUG START ----");

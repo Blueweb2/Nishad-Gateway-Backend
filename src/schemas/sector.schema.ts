@@ -8,7 +8,7 @@ export const sectorBlockSchema = {
   properties: {
     type: {
       type: "string",
-      enum: ["heading", "paragraph", "image", "list", "table"],
+      enum: ["hero", "richContent", "industries"],
     },
     data: {
       type: "object",

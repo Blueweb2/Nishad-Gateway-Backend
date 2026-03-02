@@ -10,6 +10,7 @@ import {
 } from "../types/sector.routes.types";
 
 import { IdRoute } from "../types/common.routes.types";
+import { createSectorSchema } from "../schemas/sector.schema";
 
 export async function sectorRoutes(app: FastifyInstance) {
 
@@ -23,7 +24,7 @@ export async function sectorRoutes(app: FastifyInstance) {
 
   app.post<CreateSectorRoute>(
     "/admin",
-    { preHandler: [auth, adminOnly] },
+    { preHandler: [auth, adminOnly], schema: createSectorSchema },
     SectorController.createSector
   );
 
@@ -50,7 +51,7 @@ export async function sectorRoutes(app: FastifyInstance) {
   app.get("/", SectorController.getAllSectors);
 
   app.get<SectorSlugRoute>(
-    "/slug/:slug",
+    "/:slug",
     SectorController.getSectorBySlug
   );
 }
