@@ -49,13 +49,12 @@ export interface ISubServiceContent extends Document {
     subImage: string;
   }[];
 
-  entityChooseHeading: string;
-  entityChooseSubheading: string;
-  entityChooseQuestions: {
-    question: string;
-    knowMoreLabel?: string;
-    knowMoreUrl?: string;
-  }[];
+entityChooseHeading: string;
+entityChooseSubheading: string;
+entityChooseQuestions: {
+  description: string;
+  linkUrl: string;
+}[];
 
   ownershipHeading: string;
   ownershipTabOneLabel?: string;

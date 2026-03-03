@@ -33,6 +33,40 @@ export const upsertSubServiceContentSchema = {
   },
   body: {
     type: "object",
-    additionalProperties: true, // because content is large and dynamic
+    properties: {
+      sectionOrder: { type: "array", items: { type: "string" } },
+
+      heroTitle: { type: "string" },
+      heroSubtitle: { type: "string" },
+      heroDescription: { type: "string" },
+      heroButtonText: { type: "string" },
+      heroButtonLink: { type: "string" },
+      heroImage: { type: "string" },
+
+      whyHeading: { type: "string" },
+      whySlides: { type: "array" },
+
+      entityTableHeading: { type: "string" },
+      entityTableColumns: { type: "array" },
+      entityTableRows: { type: "array" },
+
+      entityTypesHeading: { type: "string" },
+      entityTypesDescription: { type: "string" },
+      entityTypesSlides: { type: "array" },
+
+      ownershipHeading: { type: "string" },
+      ownershipSlides: { type: "array" },
+
+      entityChooseHeading: { type: "string" },
+      entityChooseSubheading: { type: "string" },
+      entityChooseQuestions: { type: "array" },
+
+      documentsHeading: { type: "string" },
+      documentsSubheading: { type: "string" },
+
+      faqHeading: { type: "string" },
+      faqs: { type: "array" },
+    },
+    additionalProperties: false, // ✅ now safe
   },
 };
