@@ -9,7 +9,6 @@ export const getSubServiceContentSchema = {
   },
 };
 
-
 // Get content by slug
 export const getSubServiceContentBySlugSchema = {
   params: {
@@ -21,8 +20,7 @@ export const getSubServiceContentBySlugSchema = {
   },
 };
 
-
-
+// Upsert content
 export const upsertSubServiceContentSchema = {
   params: {
     type: "object",
@@ -31,11 +29,17 @@ export const upsertSubServiceContentSchema = {
       subId: { type: "string", minLength: 1 },
     },
   },
+
   body: {
     type: "object",
-    properties: {
-      sectionOrder: { type: "array", items: { type: "string" } },
 
+    properties: {
+      sectionOrder: {
+        type: "array",
+        items: { type: "string" },
+      },
+
+      // HERO
       heroTitle: { type: "string" },
       heroSubtitle: { type: "string" },
       heroDescription: { type: "string" },
@@ -43,30 +47,49 @@ export const upsertSubServiceContentSchema = {
       heroButtonLink: { type: "string" },
       heroImage: { type: "string" },
 
+      // WHY
       whyHeading: { type: "string" },
       whySlides: { type: "array" },
 
+      // ENTITY TABLE
       entityTableHeading: { type: "string" },
       entityTableColumns: { type: "array" },
       entityTableRows: { type: "array" },
 
+      // ENTITY TYPES
       entityTypesHeading: { type: "string" },
       entityTypesDescription: { type: "string" },
       entityTypesSlides: { type: "array" },
 
+      // OWNERSHIP
       ownershipHeading: { type: "string" },
       ownershipSlides: { type: "array" },
 
+      // ✅ ENTITY CHOOSE (IMPORTANT FIX)
       entityChooseHeading: { type: "string" },
       entityChooseSubheading: { type: "string" },
-      entityChooseQuestions: { type: "array" },
 
+      entityChooseQuestions: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            description: { type: "string" },
+            linkUrl: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+      },
+
+      // DOCUMENTS
       documentsHeading: { type: "string" },
       documentsSubheading: { type: "string" },
 
+      // FAQ
       faqHeading: { type: "string" },
       faqs: { type: "array" },
     },
-    additionalProperties: false, // ✅ now safe
+
+    additionalProperties: true, // allows other large sections safely
   },
 };

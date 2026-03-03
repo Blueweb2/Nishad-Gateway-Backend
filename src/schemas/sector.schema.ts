@@ -10,7 +10,7 @@ export const sectorBlockSchema = {
     _id: { type: "string" },   // ✅ allow uuid
     type: {
       type: "string",
-      enum: ["hero", "richContent", "industries"],
+      enum: ["hero", "richContent", "industries", "faq"],
     },
     data: {
       type: "object",
@@ -18,7 +18,7 @@ export const sectorBlockSchema = {
     },
   },
 };
-
+console.log("Allowed block types:", sectorBlockSchema.properties.type.enum);
 /* ================= CREATE SECTOR ================= */
 
 export const createSectorSchema = {
