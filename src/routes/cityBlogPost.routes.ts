@@ -52,7 +52,10 @@ export default async function cityBlogPostRoutes(app: FastifyInstance) {
         params: publicCityBlogPostParamsSchema,
       },
     },
-    CityBlogPostController.getPublicBlogDetail
+    (req, reply) => {
+      console.log("CATEGORY BLOG ROUTE HIT");
+      return CityBlogPostController.getPublicBlogDetail(req, reply);
+    }
   );
 
   /* ======================================================
