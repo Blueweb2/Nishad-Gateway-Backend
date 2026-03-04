@@ -18,7 +18,6 @@ export const sectorBlockSchema = {
     },
   },
 };
-console.log("Allowed block types:", sectorBlockSchema.properties.type.enum);
 /* ================= CREATE SECTOR ================= */
 
 export const createSectorSchema = {
