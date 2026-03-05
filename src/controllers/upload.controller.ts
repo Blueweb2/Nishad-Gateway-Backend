@@ -39,7 +39,9 @@ console.log(folder,"folder");
       "nishad-gateway/cities/future-outlook",
       "nishad-gateway/sectors/icons",
       "nishad-gateway/sectors/hero",
-      "ministries/slides"
+      "nishad-gateway/ministries/covers",
+      "nishad-gateway/ministries/logos",
+      "nishad-gateway/ministries/slides",
     ];
 
     console.log("---- DEBUG START ----");
