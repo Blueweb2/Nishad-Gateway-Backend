@@ -3,7 +3,8 @@ import { sendResponse } from "../utils/response";
 
 export const auth = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
-    const token = req.cookies?.admin_access_token;
+    const token = req.cookies?.admin_access_token ||
+      req.headers.authorization?.replace("Bearer ", "");
     console.log("Incoming cookies:", req.cookies);
 
 

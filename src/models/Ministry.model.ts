@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+/* ================= CARD ================= */
+
 const CardSchema = new mongoose.Schema(
   {
     description: {
@@ -13,6 +15,11 @@ const CardSchema = new mongoose.Schema(
       default: "",
     },
 
+    iconPublicId: {
+      type: String,
+      default: "",
+    },
+
     alt: {
       type: String,
       default: "",
@@ -20,6 +27,8 @@ const CardSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
+/* ================= SLIDE ================= */
 
 const SlideSchema = new mongoose.Schema(
   {
@@ -40,6 +49,11 @@ const SlideSchema = new mongoose.Schema(
       default: "",
     },
 
+    imagePublicId: {
+      type: String,
+      default: "",
+    },
+
     alt: {
       type: String,
       default: "",
@@ -47,6 +61,8 @@ const SlideSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
+/* ================= FAQ ITEM ================= */
 
 const FAQItemSchema = new mongoose.Schema(
   {
@@ -65,8 +81,15 @@ const FAQItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/* ================= BLOCK ================= */
+
 const BlockSchema = new mongoose.Schema(
   {
+    id: {
+      type: String,
+      required: true,
+    },
+
     type: {
       type: String,
       enum: ["content", "slider", "cards", "faq"],
@@ -80,19 +103,16 @@ const BlockSchema = new mongoose.Schema(
 
     heading: {
       type: String,
-      trim: true,
       default: "",
     },
 
     subText: {
       type: String,
-      trim: true,
       default: "",
     },
 
     bottomText: {
       type: String,
-      trim: true,
       default: "",
     },
 
@@ -111,6 +131,11 @@ const BlockSchema = new mongoose.Schema(
       default: "",
     },
 
+    faqImagePublicId: {
+      type: String,
+      default: "",
+    },
+
     faqImageAlt: {
       type: String,
       default: "",
@@ -123,6 +148,8 @@ const BlockSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
+/* ================= MINISTRY ================= */
 
 const MinistrySchema = new mongoose.Schema(
   {
@@ -151,12 +178,22 @@ const MinistrySchema = new mongoose.Schema(
       default: "",
     },
 
+    logoPublicId: {
+      type: String,
+      default: "",
+    },
+
     logoAlt: {
       type: String,
       default: "",
     },
 
     coverImage: {
+      type: String,
+      default: "",
+    },
+
+    coverImagePublicId: {
       type: String,
       default: "",
     },
@@ -182,7 +219,7 @@ const MinistrySchema = new mongoose.Schema(
   }
 );
 
-/* ----------- Indexes ----------- */
+/* ================= INDEXES ================= */
 
 MinistrySchema.index({ slug: 1 });
 MinistrySchema.index({ isActive: 1 });

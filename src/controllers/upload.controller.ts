@@ -42,6 +42,8 @@ console.log(folder,"folder");
       "nishad-gateway/ministries/covers",
       "nishad-gateway/ministries/logos",
       "nishad-gateway/ministries/slides",
+      "nishad-gateway/ministries/faq",
+      "nishad-gateway/ministries/cards"
     ];
 
     console.log("---- DEBUG START ----");

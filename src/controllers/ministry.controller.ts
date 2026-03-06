@@ -7,6 +7,7 @@ import {
   getMinistryBySlugService,
   updateMinistryService,
   deleteMinistryService,
+  getMinistryByIdService,
 } from "../services/ministry.service";
 
 export const createMinistry = async (
@@ -56,6 +57,17 @@ export const updateMinistry = async (
   const ministry = await updateMinistryService(id, req.body);
 
   return sendResponse(reply, 200, true, "Ministry updated", ministry);
+};
+
+export const getMinistryById = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = req.params as any;
+
+  const ministry = await getMinistryByIdService(id);
+
+  return sendResponse(reply, 200, true, "Ministry fetched", ministry);
 };
 
 export const deleteMinistry = async (

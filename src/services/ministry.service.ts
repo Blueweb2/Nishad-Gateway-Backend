@@ -25,6 +25,10 @@ export const updateMinistryService = async (
   return MinistryModel.findByIdAndUpdate(id, data, { new: true });
 };
 
+export const getMinistryByIdService = async (id: string) => {
+  return MinistryModel.findById(id);   // ⭐ NEW
+};
+
 export const deleteMinistryService = async (id: string) => {
   return MinistryModel.findByIdAndDelete(id);
 };

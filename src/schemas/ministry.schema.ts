@@ -19,6 +19,7 @@ export const createMinistrySchema = {
           type: "object",
 
           properties: {
+            id: { type: "string" }, 
 
             type: {
               type: "string",
@@ -73,6 +74,23 @@ export const createMinistrySchema = {
           }
         }
       }
+    }
+  }
+};
+
+export const updateMinistrySchema = {
+  body: {
+    type: "object",
+    additionalProperties: true,
+    properties: {
+      title: { type: "string" },
+      slug: { type: "string" },
+      shortDesc: { type: "string" },
+      logo: { type: "string" },
+      logoAlt: { type: "string" },
+      coverImage: { type: "string" },
+      coverAlt: { type: "string" },
+      blocks: { type: "array" }
     }
   }
 };
