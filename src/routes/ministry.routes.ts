@@ -22,16 +22,17 @@ export default async function ministryRoutes(app: FastifyInstance) {
   // Public
   app.get("/ministries", getMinistries);
 
-  app.get("/ministries/:slug", getMinistryBySlug);
 
   // ⭐ Needed for admin editor
   app.get(
-    "/ministries/id/:id",
+    "/ministries/by-id/:id",
     {
       preHandler: [auth, adminOnly],
     },
     getMinistryById
   );
+
+    app.get("/ministries/:slug", getMinistryBySlug);
 
   // Admin
   app.post(
