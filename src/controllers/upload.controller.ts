@@ -43,7 +43,8 @@ console.log(folder,"folder");
       "nishad-gateway/ministries/logos",
       "nishad-gateway/ministries/slides",
       "nishad-gateway/ministries/faq",
-      "nishad-gateway/ministries/cards"
+      "nishad-gateway/ministries/cards",
+      "nishad-gateway/cities/content",
     ];
 
     console.log("---- DEBUG START ----");

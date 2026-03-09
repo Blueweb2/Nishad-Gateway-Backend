@@ -14,6 +14,7 @@ import cityBlogPostRoutes from "./cityBlogPost.routes";
  import mediaCleanupRoutes from "./mediaCleanup.routes";
 import { sectorRoutes } from "./sector.routes";
 import ministryRoutes from "./ministry.routes";
+import calculatorRoutes from "./calculator.routes";
 
 
 
@@ -38,6 +39,8 @@ export default async function routes(app: FastifyInstance) {
 
     app.register(sectorRoutes, { prefix: "/sectors" });
     app.register(ministryRoutes)
+
+    app.register(calculatorRoutes)
 
  
 
