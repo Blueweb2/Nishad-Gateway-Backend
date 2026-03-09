@@ -13,13 +13,25 @@ export default async function calculatorRoutes(app: FastifyInstance) {
   =================================
   */
 
-  app.post("/calculator/send-otp", async (req: any, reply) => {
+app.post(
+  "/calculator/send-otp",
+  {
+    config: {
+      rateLimit: {
+        max: 3,
+        timeWindow: "5 minutes",
+      },
+    },
+  },
+  async (req: any, reply) => {
     try {
 
       const { email } = req.body;
 
       if (!email) {
-        return reply.status(400).send({ error: "Email required" });
+        return reply.status(400).send({
+          error: "Email required",
+        });
       }
 
       const otp = await generateOTP(email);
@@ -37,10 +49,16 @@ export default async function calculatorRoutes(app: FastifyInstance) {
       return { success: true };
 
     } catch (err) {
+
       console.error(err);
-      return reply.status(500).send({ error: "OTP send failed" });
+
+      return reply.status(500).send({
+        error: "OTP send failed",
+      });
+
     }
-  });
+  }
+);
 
   /*
   =================================

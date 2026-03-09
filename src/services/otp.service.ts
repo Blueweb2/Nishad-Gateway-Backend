@@ -1,17 +1,32 @@
-import { redis } from "../plugins/redis";
+
+const otpStore: Record<string, { otp: string; expires: number }> = {};
 
 export async function generateOTP(email: string) {
-  const otp = Math.floor(100000 + Math.random() * 900000);
 
-  await redis.set(`otp:${email}`, otp, "EX", 300);
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  otpStore[email] = {
+    otp,
+    expires: Date.now() + 5 * 60 * 1000, // 5 minutes
+  };
 
   return otp;
 }
 
 export async function verifyOTP(email: string, otp: string) {
-  const stored = await redis.get(`otp:${email}`);
 
-  if (!stored) return false;
+  const record = otpStore[email];
 
-  return stored === otp;
+  if (!record) return false;
+
+  if (Date.now() > record.expires) {
+    delete otpStore[email];
+    return false;
+  }
+
+  if (record.otp !== otp) return false;
+
+  delete otpStore[email];
+
+  return true;
 }
