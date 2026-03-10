@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function generateAIReport(data: any) {
 
-  // ✅ MOCK AI for development
+  // MOCK AI (development)
   if (process.env.NODE_ENV === "development") {
 
     return `
@@ -12,32 +12,27 @@ KSA Business Expansion Advisory Report
 
 Client: ${data.fullName}
 
-Expansion Overview
-Saudi Arabia is actively encouraging foreign investment in sectors such as ${data.activity}. ${data.city} is a strategic location with strong infrastructure and commercial opportunities.
+Saudi Arabia is encouraging foreign investment in sectors like ${data.activity}.
+${data.city} offers strong infrastructure and commercial opportunities.
 
-Recommended Company Structure
-A Limited Liability Company (LLC) is typically recommended for ${data.investorType} investors entering the Saudi market.
+Recommended Setup
+Limited Liability Company (LLC)
 
-Estimated Setup Cost
-Based on your inputs, the estimated setup cost ranges between SAR 35,000 – SAR 50,000 depending on licensing, visa processing and compliance requirements.
-
-Compliance Requirements
-• Commercial Registration
-• Ministry of Investment approval
-• Municipality license
-• ZATCA tax registration
+Estimated Cost
+SAR 35,000 – SAR 50,000
 
 Strategic Advice
-Starting operations in ${data.city} with ${data.visas} visas allows gradual expansion while maintaining manageable operational costs.
+Starting with ${data.visas} visas allows gradual expansion.
 `;
   }
 
-  // 🚀 REAL AI (production only)
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash-8b",
-  });
+  try {
 
-  const prompt = `
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+    });
+
+    const prompt = `
 You are a Saudi Arabia business expansion consultant.
 
 Client:
@@ -57,7 +52,31 @@ Create a professional advisory report including:
 5. Strategic advice
 `;
 
-  const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt);
 
-  return result.response.text();
+    return result.response.text();
+
+  } catch (err) {
+
+    console.error("Gemini error:", err);
+
+    // fallback AI
+    return `
+KSA Business Expansion Advisory Report
+
+Client: ${data.fullName}
+
+Based on your inputs (${data.activity} in ${data.city}),
+Saudi Arabia offers strong opportunities for expansion.
+
+Recommended Setup
+Limited Liability Company (LLC)
+
+Estimated Cost Range
+SAR 35,000 – SAR 50,000
+
+Strategic Advice
+Start with ${data.visas} visas and scale gradually.
+`;
+  }
 }

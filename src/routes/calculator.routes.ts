@@ -117,16 +117,32 @@ if (error) {
       ============================
       */
 
-      const prediction = await predictExpansionCost(data);
-      console.log("Prediction:", prediction);
+      // const prediction = await predictExpansionCost(data);
+      // console.log("Prediction:", prediction);
 
       /*
       ============================
       AI ADVISORY REPORT
       ============================
       */
+console.log("STEP 1: prediction");
+const prediction = await predictExpansionCost(data);
 
-      const aiText = await generateAIReport(data);
+console.log("STEP 2: ai report");
+const aiText = await generateAIReport(data);
+
+// console.log("STEP 3: save lead");
+// await createLeadService({...});
+
+console.log("STEP 4: generate pdf");
+const pdfBuffer = Buffer.from(generatePDF(data, aiText));
+
+// console.log("STEP 5: send client email");
+// await resend.emails.send({...});
+
+// console.log("STEP 6: send owner email");
+// await resend.emails.send({...});
+      // const aiText = await generateAIReport(data);
 
       /*
       ============================
@@ -148,7 +164,7 @@ if (error) {
       ============================
       */
 
-      const pdfBuffer = Buffer.from(generatePDF(data, aiText));
+      // const pdfBuffer = Buffer.from(generatePDF(data, aiText));
 
       /*
       ============================
@@ -242,13 +258,13 @@ if (error) {
 
     } catch (err) {
 
-      console.error(err);
+  console.error("REPORT ERROR:", err);
 
-      return reply.status(500).send({
-        error: "Report generation failed",
-      });
+  return reply.status(500).send({
+    error: err instanceof Error ? err.message : "Report generation failed",
+  });
 
-    }
+}
   });
 
 }
