@@ -3,7 +3,7 @@ import { generateOTP, verifyOTP } from "../services/otp.service";
 import { generateAIReport } from "../services/ai.service";
 import { predictExpansionCost } from "../services/costPrediction.service";
 import { generatePDF } from "../services/pdf.service";
-import { mailer } from "../services/email.service";
+import { resend } from "../services/email.service";
 import { createLeadService } from "../services/lead.service";
 export default async function calculatorRoutes(app: FastifyInstance) {
 
@@ -13,52 +13,64 @@ export default async function calculatorRoutes(app: FastifyInstance) {
   =================================
   */
 
-app.post(
-  "/calculator/send-otp",
-  {
-    config: {
-      rateLimit: {
-        max: 3,
-        timeWindow: "5 minutes",
+  app.post(
+    "/calculator/send-otp",
+    {
+      config: {
+        rateLimit: {
+          max: 3,
+          timeWindow: "5 minutes",
+        },
       },
     },
-  },
-  async (req: any, reply) => {
-    try {
+    async (req: any, reply) => {
+      try {
 
-      const { email } = req.body;
+        const { email } = req.body;
 
-      if (!email) {
-        return reply.status(400).send({
-          error: "Email required",
+        if (!email) {
+          return reply.status(400).send({
+            error: "Email required",
+          });
+        }
+
+        const otp = await generateOTP(email);
+
+  //       await resend.emails.send({
+  //         from: "onboarding@resend.dev",
+  //         to: email,
+  //         subject: "Your Verification Code",
+  //         html: `
+  //   <h2>Your OTP Code</h2>
+  //   <h1 style="letter-spacing:4px">${otp}</h1>
+  //   <p>This code expires in 5 minutes.</p>
+  // `,
+  //       });
+const { data: emailData, error } = await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: "info@blueweb2.com",
+  subject: "Your Verification Code",
+  html: `<h1>${otp}</h1>`
+});
+
+if (error) {
+  console.error("Resend error:", error);
+  throw new Error("Email send failed");
+}
+
+        return { success: true };
+
+      } catch (err) {
+
+        console.error(err);
+
+        return reply.status(500).send({
+          error: "OTP send failed",
         });
+
       }
-
-      const otp = await generateOTP(email);
-
-      await mailer.sendMail({
-        to: email,
-        subject: "Your Verification Code",
-        html: `
-          <h2>Your OTP Code</h2>
-          <h1 style="letter-spacing:4px">${otp}</h1>
-          <p>This code expires in 5 minutes.</p>
-        `,
-      });
-
-      return { success: true };
-
-    } catch (err) {
-
-      console.error(err);
-
-      return reply.status(500).send({
-        error: "OTP send failed",
-      });
-
     }
-  }
-);
+  );
 
   /*
   =================================
@@ -66,27 +78,27 @@ app.post(
   =================================
   */
 
-app.post("/calculator/verify-otp", async (req: any, reply) => {
+  app.post("/calculator/verify-otp", async (req: any, reply) => {
 
-  const { email, otp } = req.body;
+    const { email, otp } = req.body;
 
-  if (!email || !otp) {
-    return reply.status(400).send({
-      error: "Email and OTP are required"
-    });
-  }
+    if (!email || !otp) {
+      return reply.status(400).send({
+        error: "Email and OTP are required"
+      });
+    }
 
-  const valid = await verifyOTP(email, otp);
+    const valid = await verifyOTP(email, otp);
 
-  if (!valid) {
-    return reply.status(400).send({
-      error: "Invalid OTP"
-    });
-  }
+    if (!valid) {
+      return reply.status(400).send({
+        error: "Invalid OTP"
+      });
+    }
 
-  return { verified: true };
+    return { verified: true };
 
-});
+  });
 
   /*
   =================================
@@ -172,8 +184,10 @@ app.post("/calculator/verify-otp", async (req: any, reply) => {
       <b>Nishad Gateway</b>
       `;
 
-      await mailer.sendMail({
-        to: data.email,
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
+        // to: data.email,
+        to: "info@blueweb2.com",
         subject: "Your AI KSA Expansion Report",
         html: clientHtml,
         attachments: [
@@ -190,14 +204,15 @@ app.post("/calculator/verify-otp", async (req: any, reply) => {
       ============================
       */
 
-      await mailer.sendMail({
-        to: "sabithabasimavk@gmail.com",
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: "info@blueweb2.com",
         subject: "New KSA Expansion Lead",
         html: `
         <h2>New Lead Received</h2>
 
         <p><b>Name:</b> ${data.fullName}</p>
-        <p><b>Email:</b> ${data.email}</p>
+        <p><b>Email:</b> info@blueweb2.com</p>
         <p><b>Mobile:</b> ${data.mobile}</p>
 
         <hr/>
