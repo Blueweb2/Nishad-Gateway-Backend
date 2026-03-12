@@ -15,6 +15,7 @@ import cityBlogPostRoutes from "./cityBlogPost.routes";
 import { sectorRoutes } from "./sector.routes";
 import ministryRoutes from "./ministry.routes";
 import calculatorRoutes from "./calculator.routes";
+import contactRoutes from "./contact.routes";
 
 
 
@@ -39,8 +40,11 @@ export default async function routes(app: FastifyInstance) {
 
     app.register(sectorRoutes, { prefix: "/sectors" });
     app.register(ministryRoutes)
-
+// calculate expansion cost
     app.register(calculatorRoutes)
+
+    // contact form
+    app.register(contactRoutes);
 
  
 

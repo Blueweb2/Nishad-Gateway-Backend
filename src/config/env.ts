@@ -2,7 +2,6 @@ import "dotenv/config";
 
 const required = (key: string) => {
   const value = process.env[key];
-   console.log("NODE_ENV:", process.env.NODE_ENV);
 
   if (!value || value.trim() === "") {
     throw new Error(`Missing required env variable: ${key}`);
