@@ -4,15 +4,14 @@ export interface IContent extends Document {
   cityId: mongoose.Types.ObjectId;
   categoryId: mongoose.Types.ObjectId;
 
-  placeId?: mongoose.Types.ObjectId;
-
   title: string;
   slug: string;
 
   description?: string;
+  content?: string;
   image?: string;
 
-  type: "overview" | "article" | "listing" | "place";
+  type: "overview" | "listing";
 
   address?: string;
   phone?: string;
@@ -21,76 +20,76 @@ export interface IContent extends Document {
   isFeatured?: boolean;
 
   order: number;
-  isActive: boolean;
+
+  status: "draft" | "published" | "archived";
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 const ContentSchema = new Schema<IContent>(
-  {
-    cityId: {
-      type: Schema.Types.ObjectId,
-      ref: "City",
-      required: true,
-    },
-
-    categoryId: {
-      type: Schema.Types.ObjectId,
-      ref: "CityCategory",
-      required: true,
-    },
-
-    placeId: {
-      type: Schema.Types.ObjectId,
-      ref: "CityContent",
-      default: null,
-    },
-
-    title: {
-      type: String,
-      required: true,
-    },
-
-    slug: {
-      type: String,
-      required: true,
-    },
-
-    description: String,
-    image: String,
-
-    type: {
-      type: String,
-      enum: ["overview", "article", "listing", "place"],
-      default: "article",
-    },
-
-    address: String,
-    phone: String,
-    website: String,
-
-    isFeatured: {
-      type: Boolean,
-      default: false,
-    },
-
-    order: {
-      type: Number,
-      default: 0,
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+{
+  cityId: {
+    type: Schema.Types.ObjectId,
+    ref: "City",
+    required: true,
   },
-  { timestamps: true }
+
+  categoryId: {
+    type: Schema.Types.ObjectId,
+    ref: "CityCategory",
+    required: true,
+  },
+
+  title: {
+    type: String,
+    required: true,
+  },
+
+  slug: {
+    type: String,
+    required: true,
+    lowercase: true,
+    trim: true,
+  },
+
+  description: String,
+  content: String,
+
+  image: String,
+
+  type: {
+    type: String,
+    enum: ["overview", "listing"],
+    default: "listing",
+  },
+
+  address: String,
+  phone: String,
+  website: String,
+
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
+
+  order: {
+    type: Number,
+    default: 0,
+  },
+
+  status: {
+    type: String,
+    enum: ["draft", "published", "archived"],
+    default: "draft",
+  },
+},
+{ timestamps: true }
 );
 
 ContentSchema.index({ cityId: 1, categoryId: 1 });
 ContentSchema.index({ type: 1 });
-ContentSchema.index({ slug: 1 });
+ContentSchema.index({ cityId: 1, categoryId: 1, slug: 1 }, { unique: true });
 
 export const CityContentModel =
   mongoose.models.CityContent ||

@@ -45,6 +45,7 @@ console.log(folder,"folder");
       "nishad-gateway/ministries/faq",
       "nishad-gateway/ministries/cards",
       "nishad-gateway/cities/content",
+      "nishad-gateway/cities/categories/listings",
     ];
 
     console.log("---- DEBUG START ----");
