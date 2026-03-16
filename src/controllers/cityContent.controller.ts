@@ -1,167 +1,265 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
+import * as CityContentService from "../services/cityContent.service";
 
-import {
-  createCityContentService,
-  getContentsByCategoryIdService,
-  getContentBySlugService,
-  updateCityContentService,
-  deleteCityContentService,
-  getCityContentsService,
-} from "../services/cityContent.service";
+/* ======================================================
+   CATEGORY OVERVIEW
+====================================================== */
 
-/* CREATE */
-
-export const createCityContent = async (
-  req: FastifyRequest<any>,
+export const getCategoryOverview = async (
+  req: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    const data = await createCityContentService(req.body);
+    const { cityId, categoryId } = req.params as any;
 
-    return reply.send({
-      success: true,
-      message: "Content created successfully",
-      data,
-    });
-  } catch (error) {
-    req.log.error(error);
-    return reply.status(500).send({
-      success: false,
-      message: "Failed to create content",
-    });
+    const overview = await CityContentService.getCategoryOverviewService(
+      cityId,
+      categoryId
+    );
+
+    return reply.send({ overview });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
   }
 };
 
-/* GET BY CATEGORY ID */
-
-export const getByCategoryId = async (
-  req: FastifyRequest<any>,
-  reply: FastifyReply
-) => {
-  const { categoryId } = req.params as {
-  categoryId: string;
-};
-  const data = await getContentsByCategoryIdService(categoryId);
-
-  return reply.send({
-    success: true,
-    data,
-  });
-};
-
-/* PUBLIC CATEGORY PAGE */
-
-export const getByCategorySlug = async (
-  req: FastifyRequest<any>,
+export const upsertCategoryOverview = async (
+  req: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-   const { citySlug, categorySlug } = req.params as {
-  citySlug: string;
-  categorySlug: string;
-};
+    const { cityId, categoryId } = req.params as any;
+    const payload = req.body;
 
-    const data = await getCityContentsService(citySlug, categorySlug);
+    const overview = await CityContentService.upsertCategoryOverviewService(
+      cityId,
+      categoryId,
+      payload
+    );
 
     return reply.send({
-      success: true,
-      data,
+      message: "Overview saved successfully",
+      overview,
     });
-  } catch (error) {
-    req.log.error(error);
-
-    return reply.status(500).send({
-      success: false,
-      message: "Failed to fetch contents",
-    });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
   }
 };
 
-/* GET BY SLUG */
-
-export const getBySlug = async (
-  req: FastifyRequest<any>,
+export const deleteCategoryOverview = async (
+  req: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    const { slug } = req.params as {
-  slug: string;
+    const { cityId, categoryId } = req.params as any;
+
+    await CityContentService.deleteCategoryOverviewService(
+      cityId,
+      categoryId
+    );
+
+    return reply.send({
+      message: "Overview deleted",
+    });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
+  }
 };
 
-    const data = await getContentBySlugService(slug);
+/* ======================================================
+   ADMIN LISTINGS
+====================================================== */
 
-    if (!data) {
-      return reply.status(404).send({
-        success: false,
+export const getCategoryListings = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { cityId, categoryId } = req.params as any;
+
+    const listings = await CityContentService.getCategoryListingsService(
+      cityId,
+      categoryId
+    );
+
+    return reply.send({ listings });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
+  }
+};
+
+export const createListing = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { cityId, categoryId } = req.params as any;
+    const payload = req.body;
+
+    const listing = await CityContentService.createListingService(
+      cityId,
+      categoryId,
+      payload
+    );
+
+    return reply.code(201).send({
+      message: "Listing created successfully",
+      listing,
+    });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
+  }
+};
+
+export const getCityContentById = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { contentId } = req.params as any;
+
+    const content =
+      await CityContentService.getCityContentByIdService(contentId);
+
+    if (!content) {
+      return reply.code(404).send({
         message: "Content not found",
       });
     }
 
-    return reply.send({
-      success: true,
-      data,
-    });
-  } catch (error) {
-    req.log.error(error);
-
-    return reply.status(500).send({
-      success: false,
-      message: "Failed to fetch content",
-    });
+    return reply.send({ content });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
   }
 };
-
-/* UPDATE */
 
 export const updateCityContent = async (
-  req: FastifyRequest<any>,
+  req: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    const { contentId } = req.params as {
-  contentId: string;
-};
+    const { contentId } = req.params as any;
+    const payload = req.body;
 
-    const data = await updateCityContentService(contentId, req.body);
+    const content = await CityContentService.updateCityContentService(
+      contentId,
+      payload
+    );
 
     return reply.send({
-      success: true,
       message: "Content updated successfully",
-      data,
+      content,
     });
-  } catch (error) {
-    req.log.error(error);
-
-    return reply.status(500).send({
-      success: false,
-      message: "Failed to update content",
-    });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
   }
 };
 
-/* DELETE */
-
 export const removeCityContent = async (
-  req: FastifyRequest<any>,
+  req: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    const { contentId } = req.params as {
-  contentId: string;
-};
+    const { contentId } = req.params as any;
 
-    await deleteCityContentService(contentId);
+    await CityContentService.deleteCityContentService(contentId);
 
     return reply.send({
-      success: true,
       message: "Content deleted successfully",
     });
-  } catch (error) {
-    req.log.error(error);
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
+  }
+};
 
-    return reply.status(500).send({
-      success: false,
-      message: "Failed to delete content",
+export const toggleFeatured = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { contentId } = req.params as any;
+
+    const listing =
+      await CityContentService.toggleFeaturedService(contentId);
+
+    return reply.send({
+      message: "Featured status updated",
+      listing,
     });
+  } catch (error: any) {
+    return reply.code(500).send({ message: error.message });
+  }
+};
+
+/* ======================================================
+   PUBLIC CATEGORY PAGE
+====================================================== */
+
+export const getPublicCategoryPage = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { citySlug, categorySlug } = req.params as any;
+
+    const data =
+      await CityContentService.getPublicCategoryPageService(
+        citySlug,
+        categorySlug
+      );
+
+    return reply.send(data);
+  } catch (error: any) {
+    return reply.code(404).send({ message: error.message });
+  }
+};
+
+/* ======================================================
+   PUBLIC LISTINGS
+====================================================== */
+
+export const getPublicListings = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { citySlug, categorySlug } = req.params as any;
+
+    const { page = 1, limit = 12 } = req.query as any;
+
+    const data =
+      await CityContentService.getPublicListingsService(
+        citySlug,
+        categorySlug,
+        Number(page),
+        Number(limit)
+      );
+
+    return reply.send(data);
+  } catch (error: any) {
+    return reply.code(404).send({ message: error.message });
+  }
+};
+
+/* ======================================================
+   FEATURED LISTINGS
+====================================================== */
+
+export const getFeaturedListings = async (
+  req: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const { citySlug, categorySlug } = req.params as any;
+
+    const listings =
+      await CityContentService.getFeaturedListingsService(
+        citySlug,
+        categorySlug
+      );
+
+    return reply.send({ listings });
+  } catch (error: any) {
+    return reply.code(404).send({ message: error.message });
   }
 };

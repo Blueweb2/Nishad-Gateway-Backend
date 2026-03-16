@@ -31,13 +31,18 @@ export const createCityContentSchema = {
         type: "string",
       },
 
+      /* ✅ ADD THIS */
+      content: {
+        type: "string",
+      },
+
       image: {
         type: "string",
       },
 
       type: {
         type: "string",
-        enum: ["overview", "article", "place", "business"],
+        enum: ["overview", "listing"],
       },
 
       address: {
