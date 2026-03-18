@@ -21,7 +21,7 @@ const AdminTokenSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ TTL index (auto delete expired tokens)
+// TTL index (auto delete expired tokens)
 AdminTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default mongoose.model("AdminToken", AdminTokenSchema);

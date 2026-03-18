@@ -65,7 +65,7 @@ export const upsertSubServiceContentSchema = {
       ownershipHeading: { type: "string" },
       ownershipSlides: { type: "array" },
 
-      // ✅ ENTITY CHOOSE (IMPORTANT FIX)
+      //  ENTITY CHOOSE (IMPORTANT FIX)
       entityChooseHeading: { type: "string" },
       entityChooseSubheading: { type: "string" },
 

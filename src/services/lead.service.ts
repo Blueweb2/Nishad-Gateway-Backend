@@ -24,7 +24,7 @@
 //     },
 //   };
 
-//   // ✅ Optional: prevent duplicates (email OR mobile)
+//   //  Optional: prevent duplicates (email OR mobile)
 //   const exists = await Lead.findOne({
 //     $or: [{ email: payload.email }, { mobile: payload.mobile }],
 //   });
@@ -37,7 +37,7 @@
 //   return lead;
 // };
 
-// // ✅ Add pagination (recommended)
+// // Add pagination (recommended)
 // export const getLeadsService = async (page = 1, limit = 20) => {
 //   const skip = (page - 1) * limit;
 

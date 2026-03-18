@@ -24,14 +24,14 @@ export const cityBaseSchema = {
     ],
   },
 
-  // ✅ NEW FIELD
+  //  NEW FIELD
   heading: {
     type: "string",
     minLength: 2,
     maxLength: 150,
   },
 
-  // ✅ NEW FIELD
+  //  NEW FIELD
   description: {
     type: "string",
     maxLength: 2000,

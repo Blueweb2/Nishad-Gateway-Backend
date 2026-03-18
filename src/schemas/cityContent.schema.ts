@@ -31,7 +31,7 @@ export const createCityContentSchema = {
         type: "string",
       },
 
-      /* ✅ ADD THIS */
+      /* ADD THIS */
       content: {
         type: "string",
       },

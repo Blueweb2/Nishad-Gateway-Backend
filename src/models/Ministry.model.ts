@@ -71,7 +71,7 @@ const MinistrySchema = new mongoose.Schema(
 
     slug: {
       type: String,
-      unique: true,      // ✅ only this (no duplicate index)
+      unique: true,      //  only this (no duplicate index)
       lowercase: true,
       trim: true,
     },

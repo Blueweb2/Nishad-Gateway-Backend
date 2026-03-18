@@ -8,17 +8,17 @@ export const connectDB = async () => {
       serverSelectionTimeoutMS: 5000, // fail fast
     });
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    console.log(`📦 DB Name: ${conn.connection.name}`);
+    console.log(` MongoDB Connected: ${conn.connection.host}`);
+    console.log(` DB Name: ${conn.connection.name}`);
   } catch (error) {
-    console.error("❌ MongoDB Connection Error:", error);
+    console.error(" MongoDB Connection Error:", error);
     process.exit(1);
   }
 };
 
-// 🔥 Graceful shutdown (VERY IMPORTANT)
+//  Graceful shutdown (VERY IMPORTANT)
 process.on("SIGINT", async () => {
   await mongoose.connection.close();
-  console.log("🛑 MongoDB disconnected (app termination)");
+  console.log(" MongoDB disconnected (app termination)");
   process.exit(0);
 });

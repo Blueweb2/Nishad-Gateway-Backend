@@ -23,7 +23,7 @@ const AdminActivitySchema = new mongoose.Schema(
     },
 
     targetId: {
-      type: mongoose.Schema.Types.ObjectId, // ✅ FIXED
+      type: mongoose.Schema.Types.ObjectId, //  FIXED
       default: null,
     },
 

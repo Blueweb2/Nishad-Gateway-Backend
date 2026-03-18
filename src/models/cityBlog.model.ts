@@ -108,7 +108,7 @@ const CityBlogSchema = new Schema<ICityBlog>(
 
 /* ================= INDEX ================= */
 
-// ✅ ONLY ONE INDEX (correct)
+//  ONLY ONE INDEX (correct)
 CityBlogSchema.index({ cityId: 1, status: 1 });
 
 /* ================= AUTO SORT ================= */

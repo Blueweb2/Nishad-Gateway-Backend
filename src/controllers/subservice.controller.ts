@@ -9,7 +9,7 @@ import {
 } from "../services/subservice.service";
 
 
-// ✅ CREATE SUBSERVICE
+// CREATE SUBSERVICE
 export const createSubService = async (
   req: FastifyRequest,
   reply: FastifyReply
@@ -59,7 +59,7 @@ export const createSubService = async (
 };
 
 
-// ✅ GET SUBSERVICES BY SERVICE
+//  GET SUBSERVICES BY SERVICE
 export const getSubServicesByService = async (
   req: FastifyRequest,
   reply: FastifyReply
@@ -77,7 +77,7 @@ export const getSubServicesByService = async (
 };
 
 
-// ✅ UPDATE SUBSERVICE
+//  UPDATE SUBSERVICE
 export const updateSubService = async (
   req: FastifyRequest,
   reply: FastifyReply
@@ -103,7 +103,7 @@ export const updateSubService = async (
 };
 
 
-// ✅ DELETE SUBSERVICE
+//  DELETE SUBSERVICE
 export const deleteSubService = async (
   req: FastifyRequest,
   reply: FastifyReply

@@ -5,12 +5,12 @@ export const auth = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     let token: string | undefined;
 
-    // ✅ Prefer cookie (secure httpOnly)
+    // Prefer cookie (secure httpOnly)
     if (req.cookies?.admin_access_token) {
       token = req.cookies.admin_access_token;
     }
 
-    // ✅ Fallback to Authorization header
+    // Fallback to Authorization header
     else if (req.headers.authorization?.startsWith("Bearer ")) {
       token = req.headers.authorization.split(" ")[1];
     }

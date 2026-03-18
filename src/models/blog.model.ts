@@ -58,7 +58,7 @@ const blogSchema = new Schema<IBlog>(
 
     slug: {
       type: String,
-      unique: true,          // ✅ ONLY this
+      unique: true,          // ONLY this
       lowercase: true,
       trim: true,
     },

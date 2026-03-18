@@ -5,11 +5,11 @@ import { FastifyInstance } from "fastify";
 async function dbPlugin(app: FastifyInstance) {
   const uri = process.env.MONGO_URI;
 
-  if (!uri) throw new Error("❌ MONGO_URI missing in .env");
+  if (!uri) throw new Error(" MONGO_URI missing in .env");
 
   await mongoose.connect(uri);
 
-  app.log.info("✅ MongoDB Connected");
+  app.log.info(" MongoDB Connected");
 }
 
 export default fp(dbPlugin);

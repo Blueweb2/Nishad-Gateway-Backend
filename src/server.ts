@@ -29,7 +29,7 @@ async function start() {
         await app.close();
         await mongoose.connection.close();
 
-        app.log.info("✅ Server & DB closed successfully");
+        app.log.info("Server & DB closed successfully");
         process.exit(0);
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -46,9 +46,9 @@ async function start() {
 
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error("❌ Startup Error:", err.message);
+      console.error(" Startup Error:", err.message);
     } else {
-      console.error("❌ Unknown Startup Error");
+      console.error(" Unknown Startup Error");
     }
     process.exit(1);
   }
@@ -59,12 +59,12 @@ async function start() {
 =========================== */
 
 process.on("uncaughtException", (err) => {
-  console.error("💥 Uncaught Exception:", err);
+  console.error(" Uncaught Exception:", err);
   process.exit(1);
 });
 
 process.on("unhandledRejection", (reason) => {
-  console.error("💥 Unhandled Rejection:", reason);
+  console.error(" Unhandled Rejection:", reason);
   process.exit(1);
 });
 

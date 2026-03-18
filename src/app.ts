@@ -37,7 +37,7 @@ await app.register(rateLimit, {
   keyGenerator: (req) => {
     const ip = req.ip;
 
-    // ✅ reliable check
+    // reliable check
     if (req.url.includes("/admin/login")) {
       const email = (req.body as any)?.email || "unknown";
       return `${ip}-${email}`;
@@ -95,7 +95,7 @@ await app.register(cors, {
       signed: false,
     },
     sign: {
-      expiresIn: "15m", // ✅ FIXED (removed issuer)
+      expiresIn: "15m", //  FIXED (removed issuer)
     },
   });
 

@@ -33,7 +33,7 @@ const CitySchema = new Schema<ICity>(
 
     citySlug: {
       type: String,
-      unique: true,        // ✅ only this
+      unique: true,        //  only this
       lowercase: true,
       trim: true,
     },

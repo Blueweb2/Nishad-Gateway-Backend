@@ -6,7 +6,7 @@ export default async function errorHandler(app: FastifyInstance) {
   app.setErrorHandler((error: FastifyError, request, reply) => {
     const statusCode = error.statusCode || 500;
 
-    // 🔐 Log properly (use Fastify logger)
+    //  Log properly (use Fastify logger)
     request.log.error({
       err: error,
       url: request.url,
@@ -17,7 +17,7 @@ export default async function errorHandler(app: FastifyInstance) {
        HANDLE KNOWN ERRORS
     ============================ */
 
-    // ✅ Validation errors (Fastify schema)
+    //  Validation errors (Fastify schema)
     if (error.validation) {
       return reply.status(400).send({
         success: false,
@@ -26,7 +26,7 @@ export default async function errorHandler(app: FastifyInstance) {
       });
     }
 
-    // ✅ JWT errors
+    //  JWT errors
     if (error.name === "JsonWebTokenError") {
       return reply.status(401).send({
         success: false,

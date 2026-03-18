@@ -9,7 +9,7 @@ async function uploadPlugin(app: FastifyInstance) {
     },
   });
 
-  app.log.info("✅ Multipart Upload Plugin Registered");
+  app.log.info("Multipart Upload Plugin Registered");
 }
 
 export default fp(uploadPlugin);

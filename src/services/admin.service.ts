@@ -33,7 +33,7 @@ if (!admin.password) {
     admin: {
       id: admin._id,
       email: admin.email,
-      role: admin.role, // ✅ FIXED
+      role: admin.role, // FIXED
     },
     accessToken,
     refreshToken,
@@ -79,7 +79,7 @@ export const refreshAdminTokenService = async (
     {
       id: decoded.id,
       email: decoded.email,
-      role: decoded.role, // ✅ FIXED
+      role: decoded.role, //  FIXED
       type: "access",
     },
     { expiresIn: "50m" }
@@ -111,6 +111,6 @@ export const adminMeService = async (
   return {
     id: user.id,
     email: user.email,
-    role: user.role, // ✅ dynamic role
+    role: user.role, //  dynamic role
   };
 };

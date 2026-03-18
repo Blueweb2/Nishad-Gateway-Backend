@@ -56,7 +56,7 @@ export type BlogBlock =
 
 export interface CreateBlogDTO {
   title: string;
-  slug?: string; // ✅ Optional (auto-generated)
+  slug?: string; //  Optional (auto-generated)
   excerpt: string;
 
   blocks: BlogBlock[];
@@ -69,7 +69,7 @@ export interface CreateBlogDTO {
   tags?: string[];
   status?: BlogStatus;
 
-  // ✅ Featured support
+  // Featured support
   featuredPosition?: 1 | 2 | 3 | null;
 
   metaTitle?: string;

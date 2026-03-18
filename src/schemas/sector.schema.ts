@@ -7,7 +7,7 @@ export const sectorBlockSchema = {
   additionalProperties: false,
   required: ["type", "data"],
   properties: {
-    _id: { type: "string" },   // ✅ allow uuid
+    _id: { type: "string" },   // allow uuid
     type: {
       type: "string",
       enum: ["hero", "richContent", "industries", "faq"],

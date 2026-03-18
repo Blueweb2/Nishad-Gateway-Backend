@@ -1,6 +1,6 @@
 import { SubServiceModel } from "../models/SubService.model";
 
-// ✅ Create Subservice
+// Create Subservice
 export const createSubServiceService = async (data: any) => {
   const exists = await SubServiceModel.findOne({
     serviceId: data.serviceId,
@@ -15,7 +15,7 @@ export const createSubServiceService = async (data: any) => {
   return created;
 };
 
-// ✅ Get Subservices by ServiceId
+// Get Subservices by ServiceId
 export const getSubServicesByServiceService = async (serviceId: string) => {
   const subservices = await SubServiceModel.find({ serviceId }).sort({
     order: 1,
@@ -24,7 +24,7 @@ export const getSubServicesByServiceService = async (serviceId: string) => {
   return subservices;
 };
 
-// ✅ Update Subservice
+//  Update Subservice
 export const updateSubServiceService = async (subId: string, updateData: any) => {
   const existing = await SubServiceModel.findById(subId);
 
@@ -52,7 +52,7 @@ export const updateSubServiceService = async (subId: string, updateData: any) =>
   return updated;
 };
 
-// ✅ Delete Subservice
+// Delete Subservice
 export const deleteSubServiceService = async (subId: string) => {
   const deleted = await SubServiceModel.findByIdAndDelete(subId);
 

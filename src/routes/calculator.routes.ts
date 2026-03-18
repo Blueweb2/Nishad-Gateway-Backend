@@ -26,7 +26,7 @@ export default async function calculatorRoutes(app: FastifyInstance) {
 
       const { error } = await resend.emails.send({
         from: "onboarding@resend.dev",
-        to: email, // ✅ FIXED (no hardcode)
+        to: email, //  FIXED (no hardcode)
         subject: "Your Verification Code",
         html: `<h1>${otp}</h1>`,
       });
@@ -69,7 +69,7 @@ export default async function calculatorRoutes(app: FastifyInstance) {
 
   app.post("/calculator/generate-report", async (req: FastifyRequest, reply: FastifyReply) => {
     try {
-      const data = req.body as any; // 👉 ideally define a DTO later
+      const data = req.body as any; //  ideally define a DTO later
 
       // 🔮 Prediction
       const prediction = await predictExpansionCost(data);

@@ -1,4 +1,4 @@
-import "dotenv/config"; // ✅ ADD THIS
+import "dotenv/config"; // ADD THIS
 import mongoose from "mongoose";
 import { randomUUID } from "crypto";
 import { CityBlogModel } from "../src/models/CityBlog.model";

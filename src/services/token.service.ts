@@ -10,7 +10,7 @@ export const createAdminTokens = (
     {
       id: admin._id,
       email: admin.email,
-      role: admin.role,   // ✅ USE REAL ROLE
+      role: admin.role,   // USE REAL ROLE
       type: "access",
     },
     { expiresIn: "50m" }
@@ -20,7 +20,7 @@ export const createAdminTokens = (
     {
       id: admin._id,
       email: admin.email,
-      role: admin.role,   // ✅ USE REAL ROLE
+      role: admin.role,   //  USE REAL ROLE
       type: "refresh",
     },
     { expiresIn: "7d" }

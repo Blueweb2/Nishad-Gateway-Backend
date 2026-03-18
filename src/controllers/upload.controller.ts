@@ -23,7 +23,7 @@ console.log(folder,"folder");
 
     const cleanFolder = folder.trim();
 
-    // ✅ Allowed folders (security)
+    // Allowed folders (security)
     const allowedFolders = [
       "nishad-gateway/subservices",
       "nishad-gateway/blogs",
@@ -49,11 +49,7 @@ console.log(folder,"folder");
       "nishad-gateway/editor",
     ];
 
-    console.log("---- DEBUG START ----");
-console.log("Received:", JSON.stringify(cleanFolder));
-console.log("Length:", cleanFolder.length);
 
-console.log("THIS IS THE ACTIVE UPLOAD CONTROLLER");
 
 allowedFolders.forEach((f, i) => {
   console.log(

@@ -195,8 +195,8 @@ export const citySectionSchema = {
                 },
               },
 
-              decisionFlow: { type: "string" },   // ✅ optional
-              bottomText: { type: "string" },     // ✅ optional
+              decisionFlow: { type: "string" },   // optional
+              bottomText: { type: "string" },     // optional
             },
           },
         },
@@ -263,12 +263,12 @@ export const citySectionSchema = {
                 minItems: 1,
                 items: {
                   type: "object",
-                  required: ["title", "description", "link"], // ✅ updated
+                  required: ["title", "description", "link"], //  updated
                   additionalProperties: false,
                   properties: {
                     title: { type: "string", minLength: 1 },
                     description: { type: "string", minLength: 1 },
-                    link: { type: "string", minLength: 1 }, // ✅ added
+                    link: { type: "string", minLength: 1 }, // added
                   },
                 },
               },

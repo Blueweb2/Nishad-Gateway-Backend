@@ -48,8 +48,8 @@ const SectorSchema = new Schema<ISector>(
     slug: {
       type: String,
       required: true,
-      unique: true, // ✅ keep ONLY this
-      lowercase: true, // 🔥 normalize
+      unique: true, //  keep ONLY this
+      lowercase: true, // normalize
       trim: true,
     },
 
@@ -95,12 +95,12 @@ const SectorSchema = new Schema<ISector>(
 
 /* ================= INDEXES ================= */
 
-// 🔥 slug (already indexed via unique)
+//  slug (already indexed via unique)
 
-// 🔥 sorting + filtering
+// sorting + filtering
 SectorSchema.index({ status: 1, order: 1 });
 
-// 🔥 latest sectors
+//  latest sectors
 SectorSchema.index({ createdAt: -1 });
 
 export const SectorModel =
