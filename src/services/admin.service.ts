@@ -16,15 +16,17 @@ const admin = await Admin.findOne({ email }).select("+password");
     throw createError(401, "Admin not found");
   }
 
-  const isMatch = await comparePassword(password, admin.password);
+  await new Promise((res) => setTimeout(res, 300)); //  slow attackers
 
-  if (!isMatch) {
-    throw createError(401, "Invalid password");
-  }
-  if (!admin.password) {
-  throw createError(500, "Password not found in DB");
+const isMatch = await comparePassword(password, admin.password);
+
+if (!isMatch) {
+  throw createError(401, "Invalid password");
 }
 
+if (!admin.password) {
+  throw createError(500, "Password not found in DB");
+}
   const { accessToken, refreshToken } = createAdminTokens(app, admin);
 
   return {

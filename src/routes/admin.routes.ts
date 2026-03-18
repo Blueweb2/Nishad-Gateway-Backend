@@ -24,7 +24,18 @@ export default async function adminRoutes(app: FastifyInstance) {
   app.register(async function (admin) {
 
     /* ---------- PUBLIC ---------- */
-    admin.post("/login", loginAdminController);
+admin.post(
+  "/login",
+  {
+    config: {
+      rateLimit: {
+        max: 5, // 🔥 only 5 attempts
+        timeWindow: "1 minute",
+      },
+    },
+  },
+  loginAdminController
+);
     admin.post("/refresh", refreshAdminTokenController);
 
     /* ---------- AUTH ---------- */

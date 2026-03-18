@@ -26,10 +26,35 @@ export const buildApp = async () => {
 
   await app.register(helmet);
 
-  await app.register(rateLimit, {
-    max: 100,
-    timeWindow: "1 minute",
-  });
+  // await app.register(rateLimit, {
+  //   max: 100,
+  //   timeWindow: "1 minute",
+  // });
+
+await app.register(rateLimit, {
+  global: true,
+
+  keyGenerator: (req) => {
+    const ip = req.ip;
+
+    // ✅ reliable check
+    if (req.url.includes("/admin/login")) {
+      const email = (req.body as any)?.email || "unknown";
+      return `${ip}-${email}`;
+    }
+
+    return ip;
+  },
+
+  errorResponseBuilder: (req, context) => {
+    return {
+      success: false,
+      message: `Too many login attempts. Try again in ${context.after}`,
+    };
+  },
+});
+
+
 
   /* ===========================
      CORE PLUGINS
