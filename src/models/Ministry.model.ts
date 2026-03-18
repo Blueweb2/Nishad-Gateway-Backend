@@ -1,94 +1,40 @@
-import mongoose from "mongoose";
+import slugify from "../utils/slugify";
+import mongoose, { HydratedDocument } from "mongoose";
 
-/* ================= CARD ================= */
+/* ================= SUB SCHEMAS ================= */
 
 const CardSchema = new mongoose.Schema(
   {
-    description: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    iconSvg: {
-      type: String,
-      default: "",
-    },
-
-    iconPublicId: {
-      type: String,
-      default: "",
-    },
-
-    alt: {
-      type: String,
-      default: "",
-    },
+    description: { type: String, trim: true, default: "" },
+    iconSvg: { type: String, default: "" },
+    iconPublicId: { type: String, default: "" },
+    alt: { type: String, default: "" },
   },
   { _id: false }
 );
-
-/* ================= SLIDE ================= */
 
 const SlideSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    description: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    image: {
-      type: String,
-      default: "",
-    },
-
-    imagePublicId: {
-      type: String,
-      default: "",
-    },
-
-    alt: {
-      type: String,
-      default: "",
-    },
+    title: { type: String, trim: true, default: "" },
+    description: { type: String, trim: true, default: "" },
+    image: { type: String, default: "" },
+    imagePublicId: { type: String, default: "" },
+    alt: { type: String, default: "" },
   },
   { _id: false }
 );
-
-/* ================= FAQ ITEM ================= */
 
 const FAQItemSchema = new mongoose.Schema(
   {
-    q: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    a: {
-      type: String,
-      trim: true,
-      default: "",
-    },
+    q: { type: String, trim: true, default: "" },
+    a: { type: String, trim: true, default: "" },
   },
   { _id: false }
 );
 
-/* ================= BLOCK ================= */
-
 const BlockSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      required: true,
-    },
+    id: { type: String, required: true },
 
     type: {
       type: String,
@@ -96,60 +42,24 @@ const BlockSchema = new mongoose.Schema(
       required: true,
     },
 
-    content: {
-      type: String,
-      default: "",
-    },
+    content: { type: String, default: "" },
+    heading: { type: String, default: "" },
+    subText: { type: String, default: "" },
+    bottomText: { type: String, default: "" },
 
-    heading: {
-      type: String,
-      default: "",
-    },
+    slides: { type: [SlideSchema], default: [] },
+    cards: { type: [CardSchema], default: [] },
 
-    subText: {
-      type: String,
-      default: "",
-    },
+    faqImage: { type: String, default: "" },
+    faqImagePublicId: { type: String, default: "" },
+    faqImageAlt: { type: String, default: "" },
 
-    bottomText: {
-      type: String,
-      default: "",
-    },
-
-    slides: {
-      type: [SlideSchema],
-      default: [],
-    },
-
-    cards: {
-      type: [CardSchema],
-      default: [],
-    },
-
-    faqImage: {
-      type: String,
-      default: "",
-    },
-
-    faqImagePublicId: {
-      type: String,
-      default: "",
-    },
-
-    faqImageAlt: {
-      type: String,
-      default: "",
-    },
-
-    faqs: {
-      type: [FAQItemSchema],
-      default: [],
-    },
+    faqs: { type: [FAQItemSchema], default: [] },
   },
   { _id: false }
 );
 
-/* ================= MINISTRY ================= */
+/* ================= MAIN ================= */
 
 const MinistrySchema = new mongoose.Schema(
   {
@@ -161,52 +71,24 @@ const MinistrySchema = new mongoose.Schema(
 
     slug: {
       type: String,
-      required: true,
-      unique: true,
+      unique: true,      // ✅ only this (no duplicate index)
+      lowercase: true,
       trim: true,
-      index: true,
     },
 
-    shortDesc: {
-      type: String,
-      trim: true,
-      default: "",
-    },
+    shortDesc: { type: String, trim: true, default: "" },
 
-    logo: {
-      type: String,
-      default: "",
-    },
+    logo: { type: String, default: "" },
+    logoPublicId: { type: String, default: "" },
+    logoAlt: { type: String, default: "" },
 
-    logoPublicId: {
-      type: String,
-      default: "",
-    },
-
-    logoAlt: {
-      type: String,
-      default: "",
-    },
-
-    coverImage: {
-      type: String,
-      default: "",
-    },
-
-    coverImagePublicId: {
-      type: String,
-      default: "",
-    },
-
-    coverAlt: {
-      type: String,
-      default: "",
-    },
+    coverImage: { type: String, default: "" },
+    coverImagePublicId: { type: String, default: "" },
+    coverAlt: { type: String, default: "" },
 
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
     },
 
     blocks: {
@@ -214,15 +96,38 @@ const MinistrySchema = new mongoose.Schema(
       default: [],
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 /* ================= INDEXES ================= */
 
-MinistrySchema.index({ slug: 1 });
-MinistrySchema.index({ isActive: 1 });
+// 🔥 fast filtering + sorting
+MinistrySchema.index({ isActive: 1, createdAt: -1 });
+
+/* ================= SLUG LOGIC ================= */
+
+
+
+// 👇 define document type
+type MinistryDoc = HydratedDocument<any>;
+
+MinistrySchema.pre("save", async function (this: MinistryDoc) {
+  if (!this.isModified("title")) return;
+
+  const baseSlug = slugify(this.title);
+  let slug = baseSlug;
+  let count = 1;
+
+  const Ministry = mongoose.models.Ministry;
+
+  while (await Ministry.findOne({ slug })) {
+    slug = `${baseSlug}-${count++}`;
+  }
+
+  this.slug = slug;
+});
+
+/* ================= EXPORT ================= */
 
 export const MinistryModel =
   mongoose.models.Ministry ||

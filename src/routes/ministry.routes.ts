@@ -6,11 +6,11 @@ import {
   getMinistryBySlug,
   updateMinistry,
   deleteMinistry,
-  getMinistryById   // ⭐ add this
+  getMinistryById
 } from "../controllers/ministry.controller";
 
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 
 import {
   createMinistrySchema,
@@ -19,26 +19,29 @@ import {
 
 export default async function ministryRoutes(app: FastifyInstance) {
 
-  // Public
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
+
+  /* ================= PUBLIC ================= */
+
   app.get("/ministries", getMinistries);
 
+  app.get("/ministries/:slug", getMinistryBySlug);
+
+  /* ================= ADMIN ================= */
 
   // ⭐ Needed for admin editor
   app.get(
     "/ministries/by-id/:id",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
     },
     getMinistryById
   );
 
-    app.get("/ministries/:slug", getMinistryBySlug);
-
-  // Admin
   app.post(
     "/ministries",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: createMinistrySchema,
     },
     createMinistry
@@ -47,7 +50,7 @@ export default async function ministryRoutes(app: FastifyInstance) {
   app.put(
     "/ministries/:id",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: updateMinistrySchema,
     },
     updateMinistry
@@ -56,7 +59,7 @@ export default async function ministryRoutes(app: FastifyInstance) {
   app.delete(
     "/ministries/:id",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
     },
     deleteMinistry
   );

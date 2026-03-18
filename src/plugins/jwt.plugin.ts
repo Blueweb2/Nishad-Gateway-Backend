@@ -5,15 +5,22 @@ import { FastifyInstance } from "fastify";
 import { env } from "../config/env";
 
 async function jwtPlugin(app: FastifyInstance) {
-  // 1) cookie first
+  // 🍪 Cookie
   await app.register(fastifyCookie);
 
-  // 2) jwt after cookie
+  // 🔐 JWT
   await app.register(fastifyJwt, {
     secret: env.JWT_SECRET,
+    cookie: {
+      cookieName: "admin_access_token",
+      signed: false,
+    },
+    sign: {
+      expiresIn: "15m",
+    },
   });
 
-  app.log.info("✅ JWT + Cookie Plugin Registered");
+  app.log.info("🔐 JWT + Cookie configured");
 }
 
 export default fp(jwtPlugin);

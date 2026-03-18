@@ -1,17 +1,16 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { randomUUID } from "crypto";
 
-/* ======================================================
-   TYPES
-====================================================== */
+/* ================= TYPES ================= */
 
 export interface ICitySection {
-  id: string; // ✅ REQUIRED
+  id: string;
+
   type:
     | "HERO"
     | "CATEGORIES"
     | "VISION"
-    |"BUSINESS_SETUP_OPTIONS"
+    | "BUSINESS_SETUP_OPTIONS"
     | "INVESTMENT_HIGHLIGHTS"
     | "INFRASTRUCTURE"
     | "LANDMARKS"
@@ -34,56 +33,55 @@ export interface ICityBlog extends Document {
   updatedAt: Date;
 }
 
-/* ======================================================
-   SECTION SCHEMA
-====================================================== */
+/* ================= SECTION ================= */
 
-const CitySectionSchema = new Schema<ICitySection>({
-  id: {
-    type: String,
-    required: true,
-    default: () => randomUUID(), // ✅ AUTO GENERATE
+const CitySectionSchema = new Schema<ICitySection>(
+  {
+    id: {
+      type: String,
+      required: true,
+      default: () => randomUUID(),
+    },
+
+    type: {
+      type: String,
+      required: true,
+      enum: [
+        "HERO",
+        "CATEGORIES",
+        "VISION",
+        "BUSINESS_SETUP_OPTIONS",
+        "INVESTMENT_HIGHLIGHTS",
+        "INFRASTRUCTURE",
+        "LANDMARKS",
+        "FOOD_GUIDE",
+        "TRANSPORTATION_GUIDE",
+        "EXPANDABLE_SNAPSHOT",
+        "FUTURE_OUTLOOK",
+      ],
+    },
+
+    title: { type: String, default: "" },
+
+    content: {
+      type: Schema.Types.Mixed,
+      required: true,
+    },
+
+    order: {
+      type: Number,
+      default: 0,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
+  { _id: false } // 🔥 IMPORTANT
+);
 
-  type: {
-    type: String,
-    required: true,
-    enum: [
-      "HERO",
-      "CATEGORIES",
-      "VISION",
-      "INVESTMENT_HIGHLIGHTS",
-      "INFRASTRUCTURE",
-      "BUSINESS_SETUP_OPTIONS", 
-      "LANDMARKS",
-      "FOOD_GUIDE",
-      "TRANSPORTATION_GUIDE",
-      "EXPANDABLE_SNAPSHOT",
-      "FUTURE_OUTLOOK",
-    ],
-  },
-
-  title: { type: String, default: "" },
-
-  content: {
-    type: Schema.Types.Mixed,
-    required: true,
-  },
-
-  order: {
-    type: Number,
-    default: 0,
-  },
-
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-});
-
-/* ======================================================
-   CITY BLOG SCHEMA
-====================================================== */
+/* ================= MAIN ================= */
 
 const CityBlogSchema = new Schema<ICityBlog>(
   {
@@ -108,8 +106,20 @@ const CityBlogSchema = new Schema<ICityBlog>(
   { timestamps: true }
 );
 
-CityBlogSchema.index({ status: 1 });
+/* ================= INDEX ================= */
+
+// ✅ ONLY ONE INDEX (correct)
 CityBlogSchema.index({ cityId: 1, status: 1 });
+
+/* ================= AUTO SORT ================= */
+
+CityBlogSchema.pre("save", function () {
+  if (this.sections?.length) {
+    this.sections.sort((a, b) => a.order - b.order);
+  }
+});
+
+/* ================= EXPORT ================= */
 
 export const CityBlogModel =
   mongoose.models.CityBlog ||

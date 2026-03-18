@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { CityBlogController } from "../controllers/cityBlog.controller";
 
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 
 import {
   updateCityBlogSchema,
@@ -10,8 +10,6 @@ import {
 } from "../schemas/cityBlog.schema";
 
 import { idParamSchema } from "../schemas/common.params";
-import { CityPublicBlogController } from "../controllers/cityPublicBlog.controller";
-
 
 import {
   IdRoute,
@@ -20,6 +18,8 @@ import {
 } from "../types/routes.types";
 
 export default async function cityBlogRoutes(app: FastifyInstance) {
+
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
 
   /* ================= PUBLIC ================= */
 
@@ -36,7 +36,7 @@ export default async function cityBlogRoutes(app: FastifyInstance) {
   app.get<IdRoute>(
     "/admin/cities/:id/blog",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: { params: idParamSchema },
     },
     CityBlogController.getByCityId
@@ -45,19 +45,10 @@ export default async function cityBlogRoutes(app: FastifyInstance) {
   app.put<CityBlogUpsertRoute>(
     "/admin/cities/:id/blog",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: updateCityBlogSchema,
     },
     CityBlogController.upsert
   );
-
-  /* ================= PUBLIC CATEGORY ================= */
-
-// app.get(
-//   "/cities/:citySlug/:categorySlug",
-//   CityPublicBlogController.getCategoryBlogs
-// );
-
-
 
 }

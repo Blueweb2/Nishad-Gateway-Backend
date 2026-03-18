@@ -2,23 +2,29 @@ import { FastifyInstance } from "fastify";
 import {
   getSubServiceContent,
   upsertSubServiceContent,
-    getSubServiceContentBySlug,
+  getSubServiceContentBySlug,
 } from "../controllers/content.controller";
 
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 
 export default async function contentRoutes(app: FastifyInstance) {
-  // Public
+
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
+
+  /* ================= PUBLIC ================= */
+
   app.get("/subservices/:subId/content", getSubServiceContent);
 
-  // Public (by slug)
-    app.get("/subservices/slug/:slug/content", getSubServiceContentBySlug);
+  app.get("/subservices/slug/:slug/content", getSubServiceContentBySlug);
 
-  // Admin Protected
+  /* ================= ADMIN ================= */
+
   app.put(
     "/subservices/:subId/content",
-    { preHandler: [auth, adminOnly] },
+    {
+      preHandler: adminAccess,
+    },
     upsertSubServiceContent
   );
 }

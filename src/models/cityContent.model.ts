@@ -1,8 +1,11 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, {
+  Schema,
+  Document,
+  HydratedDocument,
+} from "mongoose";
+import slugify from "../utils/slugify";
 
-/* ======================================================
-   TYPES
-====================================================== */
+/* ================= TYPES ================= */
 
 export interface ICityContent extends Document {
   cityId: mongoose.Types.ObjectId;
@@ -24,19 +27,18 @@ export interface ICityContent extends Document {
   phone?: string;
   website?: string;
   openingHours?: string;
-orderInfo?: string;
-locationLabel?: string;
-email?: string;
-priceRange?: string;
-rating?: number;
+  orderInfo?: string;
+  locationLabel?: string;
+  email?: string;
+  priceRange?: string;
+  rating?: number;
 
-coordinates: {
-  lat: number,
-  lng: number
-}
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 
   isFeatured?: boolean;
-
   order: number;
 
   status: "draft" | "published" | "archived";
@@ -45,9 +47,9 @@ coordinates: {
   updatedAt: Date;
 }
 
-/* ======================================================
-   SCHEMA
-====================================================== */
+type CityContentDoc = HydratedDocument<ICityContent>;
+
+/* ================= SCHEMA ================= */
 
 const CityContentSchema = new Schema<ICityContent>(
   {
@@ -55,14 +57,12 @@ const CityContentSchema = new Schema<ICityContent>(
       type: Schema.Types.ObjectId,
       ref: "City",
       required: true,
-      index: true,
     },
 
     categoryId: {
       type: Schema.Types.ObjectId,
       ref: "CityCategory",
       required: true,
-      index: true,
     },
 
     title: {
@@ -78,89 +78,39 @@ const CityContentSchema = new Schema<ICityContent>(
       match: /^[a-z0-9-]+$/,
     },
 
-    description: {
-      type: String,
-      default: "",
-    },
+    description: { type: String, default: "" },
+    content: { type: String, default: "" },
 
-    content: {
-      type: String,
-      default: "",
-    },
-
- 
-
-    coverImage: {
-  type: String,
-  default: "",
-},
-
-coverImagePublicId: {
-  type: String,
-  default: "",
-},
-
-coverImageAlt: {
-  type: String,
-  default: "",
-},
+    coverImage: { type: String, default: "" },
+    coverImagePublicId: { type: String, default: "" },
+    coverImageAlt: { type: String, default: "" },
 
     type: {
       type: String,
       enum: ["overview", "listing"],
       default: "listing",
-      index: true,
     },
 
-    address: {
-      type: String,
-      default: "",
+    address: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    website: { type: String, default: "" },
+    openingHours: { type: String, default: "" },
+    orderInfo: { type: String, default: "" },
+    locationLabel: { type: String, default: "" },
+    email: { type: String, default: "" },
+    priceRange: { type: String, default: "" },
+
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: null,
     },
 
-    phone: {
-      type: String,
-      default: "",
+    coordinates: {
+      lat: Number,
+      lng: Number,
     },
-
-    website: {
-      type: String,
-      default: "",
-    },
-    openingHours: {
-  type: String,
-  default: "",
-},
-
-orderInfo: {
-  type: String,
-  default: "",
-},
-
-locationLabel: {
-  type: String,
-  default: "",
-},
-
-email: {
-  type: String,
-  default: "",
-},
-
-priceRange: {
-  type: String,
-  default: "",
-},
-
-rating: {
-  type: Number,
-  min: 0,
-  max: 5,
-  default: null,
-},
-coordinates: {
-  lat: { type: Number },
-  lng: { type: Number },
-},
 
     isFeatured: {
       type: Boolean,
@@ -176,20 +126,21 @@ coordinates: {
       type: String,
       enum: ["draft", "published", "archived"],
       default: "draft",
-      index: true,
     },
   },
   { timestamps: true }
 );
 
-/* ======================================================
-   INDEXES
-====================================================== */
+/* ================= INDEXES ================= */
 
-/* Fast lookup for category listings */
-CityContentSchema.index({ cityId: 1, categoryId: 1, type: 1 });
+// 🔥 MAIN QUERY (MOST IMPORTANT)
+CityContentSchema.index({
+  categoryId: 1,
+  status: 1,
+  order: 1,
+});
 
-/* Ensure only ONE overview per category */
+// 🔥 overview uniqueness
 CityContentSchema.index(
   { categoryId: 1, type: 1 },
   {
@@ -198,24 +149,49 @@ CityContentSchema.index(
   }
 );
 
-/* Optional unique slug for listings */
+// 🔥 slug uniqueness per category
 CityContentSchema.index(
-  { cityId: 1, categoryId: 1, slug: 1 },
-  {
-    unique: true,
-    sparse: true,
-  }
+  { categoryId: 1, slug: 1 },
+  { unique: true, sparse: true }
 );
 
-/* Featured listings query optimization */
-CityContentSchema.index({ categoryId: 1, isFeatured: 1 });
+// 🔥 featured queries
+CityContentSchema.index({
+  categoryId: 1,
+  isFeatured: 1,
+  status: 1,
+});
 
-/* Sorting listings */
-CityContentSchema.index({ categoryId: 1, order: 1 });
+// 🔥 GEO INDEX (VERY POWERFUL)
+CityContentSchema.index({
+  "coordinates.lat": 1,
+  "coordinates.lng": 1,
+});
 
-/* ======================================================
-   MODEL EXPORT
-====================================================== */
+/* ================= SLUG ================= */
+
+CityContentSchema.pre("save", async function (this: CityContentDoc) {
+  if (!this.isModified("title")) return;
+
+  let baseSlug = slugify(this.title);
+  let slug = baseSlug;
+  let count = 1;
+
+  const Model = mongoose.models.CityContent;
+
+  while (
+    await Model.findOne({
+      categoryId: this.categoryId,
+      slug,
+    })
+  ) {
+    slug = `${baseSlug}-${count++}`;
+  }
+
+  this.slug = slug;
+});
+
+/* ================= EXPORT ================= */
 
 export const CityContentModel =
   mongoose.models.CityContent ||

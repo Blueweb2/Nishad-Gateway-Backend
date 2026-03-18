@@ -9,7 +9,8 @@ import {
 } from "../controllers/service.controller";
 
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
+
 import {
   createServiceSchema,
   updateServiceSchema,
@@ -18,21 +19,47 @@ import {
 } from "../schemas/service.schema";
 
 export default async function serviceRoutes(app: FastifyInstance) {
-  // Public
+
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
+
+  /* ================= PUBLIC ================= */
+
   app.get("/services", getServices);
- 
-  // PUBLIC menu route
+
   app.get("/services/menu", getServicesWithSubServices);
-  // Public (get service by slug)
-app.get("/services/slug/:slug", { schema: getServiceBySlugSchema }, getServiceBySlug);
 
+  app.get(
+    "/services/slug/:slug",
+    { schema: getServiceBySlugSchema },
+    getServiceBySlug
+  );
 
-  // Admin Protected
-  app.post("/services", { preHandler: [auth, adminOnly], schema: createServiceSchema }, createService);
-  app.put("/services/:id", { preHandler: [auth, adminOnly], schema: updateServiceSchema }, updateService);
-app.delete(
-  "/services/:id",
-  { preHandler: [auth, adminOnly], schema: deleteServiceSchema },
-  deleteService
-);
+  /* ================= ADMIN ================= */
+
+  app.post(
+    "/services",
+    {
+      preHandler: adminAccess,
+      schema: createServiceSchema,
+    },
+    createService
+  );
+
+  app.put(
+    "/services/:id",
+    {
+      preHandler: adminAccess,
+      schema: updateServiceSchema,
+    },
+    updateService
+  );
+
+  app.delete(
+    "/services/:id",
+    {
+      preHandler: adminAccess,
+      schema: deleteServiceSchema,
+    },
+    deleteService
+  );
 }

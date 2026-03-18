@@ -1,4 +1,11 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, {
+  Schema,
+  Document,
+  HydratedDocument,
+} from "mongoose";
+import slugify from "../utils/slugify";
+
+/* ================= TYPES ================= */
 
 export interface ICityCategory extends Document {
   cityId: mongoose.Types.ObjectId;
@@ -11,9 +18,9 @@ export interface ICityCategory extends Document {
   updatedAt: Date;
 }
 
-/* ======================================================
-   CITY CATEGORY SCHEMA
-====================================================== */
+type CityCategoryDoc = HydratedDocument<ICityCategory>;
+
+/* ================= SCHEMA ================= */
 
 const CityCategorySchema = new Schema<ICityCategory>(
   {
@@ -21,7 +28,6 @@ const CityCategorySchema = new Schema<ICityCategory>(
       type: Schema.Types.ObjectId,
       ref: "City",
       required: true,
-      index: true,
     },
 
     name: {
@@ -32,10 +38,9 @@ const CityCategorySchema = new Schema<ICityCategory>(
 
     slug: {
       type: String,
-      required: true,
-      trim: true,
       lowercase: true,
-      match: /^[a-z0-9-]+$/, // recommended validation
+      trim: true,
+      match: /^[a-z0-9-]+$/,
     },
 
     description: {
@@ -56,25 +61,44 @@ const CityCategorySchema = new Schema<ICityCategory>(
   { timestamps: true }
 );
 
-/* ======================================================
-   INDEXES
-====================================================== */
+/* ================= INDEXES ================= */
 
-// Prevent duplicate slug inside same city
+// 🔥 unique per city
 CityCategorySchema.index(
   { cityId: 1, slug: 1 },
   { unique: true }
 );
 
-// Optimize category listing by order
-CityCategorySchema.index({ cityId: 1, order: 1 });
+// 🔥 MOST IMPORTANT QUERY
+CityCategorySchema.index({ cityId: 1, isActive: 1, order: 1 });
 
-// Optimize filtering active categories
-CityCategorySchema.index({ cityId: 1, isActive: 1 });
+// 🔥 optional sorting
+CityCategorySchema.index({ createdAt: -1 });
 
-/* ======================================================
-   MODEL EXPORT
-====================================================== */
+/* ================= SLUG ================= */
+
+CityCategorySchema.pre("save", async function (this: CityCategoryDoc) {
+  if (!this.isModified("name")) return;
+
+  let baseSlug = slugify(this.name);
+  let slug = baseSlug;
+  let count = 1;
+
+  const Model = mongoose.models.CityCategory;
+
+  while (
+    await Model.findOne({
+      cityId: this.cityId,
+      slug,
+    })
+  ) {
+    slug = `${baseSlug}-${count++}`;
+  }
+
+  this.slug = slug;
+});
+
+/* ================= EXPORT ================= */
 
 export const CityCategoryModel =
   mongoose.models.CityCategory ||

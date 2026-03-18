@@ -1,90 +1,55 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { generateOTP, verifyOTP } from "../services/otp.service";
 import { generateAIReport } from "../services/ai.service";
 import { predictExpansionCost } from "../services/costPrediction.service";
 import { generatePDF } from "../services/pdf.service";
 import { resend } from "../services/email.service";
 import { createLeadService } from "../services/lead.service";
+
 export default async function calculatorRoutes(app: FastifyInstance) {
 
-  /*
-  =================================
-  SEND OTP
-  =================================
-  */
+  /* ================= OTP SEND ================= */
 
-  app.post(
-    "/calculator/send-otp",
-    {
-      config: {
-        rateLimit: {
-          max: 3,
-          timeWindow: "5 minutes",
-        },
-      },
+  app.post("/calculator/send-otp", {
+    config: {
+      rateLimit: { max: 3, timeWindow: "5 minutes" },
     },
-    async (req: any, reply) => {
-      try {
+  }, async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { email } = req.body as { email?: string };
 
-        const { email } = req.body;
-
-        if (!email) {
-          return reply.status(400).send({
-            error: "Email required",
-          });
-        }
-
-        const otp = await generateOTP(email);
-
-  //       await resend.emails.send({
-  //         from: "onboarding@resend.dev",
-  //         to: email,
-  //         subject: "Your Verification Code",
-  //         html: `
-  //   <h2>Your OTP Code</h2>
-  //   <h1 style="letter-spacing:4px">${otp}</h1>
-  //   <p>This code expires in 5 minutes.</p>
-  // `,
-  //       });
-const { data: emailData, error } = await resend.emails.send({
-  from: "onboarding@resend.dev",
-  to: "info@blueweb2.com",
-  subject: "Your Verification Code",
-  html: `<h1>${otp}</h1>`
-});
-
-if (error) {
-  console.error("Resend error:", error);
-  throw new Error("Email send failed");
-}
-
-        return { success: true };
-
-      } catch (err) {
-
-        console.error(err);
-
-        return reply.status(500).send({
-          error: "OTP send failed",
-        });
-
+      if (!email) {
+        return reply.status(400).send({ success: false, message: "Email required" });
       }
+
+      const otp = await generateOTP(email);
+
+      const { error } = await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: email, // ✅ FIXED (no hardcode)
+        subject: "Your Verification Code",
+        html: `<h1>${otp}</h1>`,
+      });
+
+      if (error) throw new Error("Email send failed");
+
+      return { success: true };
+
+    } catch (err) {
+      req.log.error(err);
+      return reply.status(500).send({ success: false, message: "OTP send failed" });
     }
-  );
+  });
 
-  /*
-  =================================
-  VERIFY OTP
-  =================================
-  */
+  /* ================= OTP VERIFY ================= */
 
-  app.post("/calculator/verify-otp", async (req: any, reply) => {
-
-    const { email, otp } = req.body;
+  app.post("/calculator/verify-otp", async (req: FastifyRequest, reply: FastifyReply) => {
+    const { email, otp } = req.body as { email?: string; otp?: string };
 
     if (!email || !otp) {
       return reply.status(400).send({
-        error: "Email and OTP are required"
+        success: false,
+        message: "Email and OTP are required",
       });
     }
 
@@ -92,64 +57,27 @@ if (error) {
 
     if (!valid) {
       return reply.status(400).send({
-        error: "Invalid OTP"
+        success: false,
+        message: "Invalid OTP",
       });
     }
 
-    return { verified: true };
-
+    return { success: true, verified: true };
   });
 
-  /*
-  =================================
-  GENERATE REPORT
-  =================================
-  */
+  /* ================= GENERATE REPORT ================= */
 
-  app.post("/calculator/generate-report", async (req: any, reply) => {
+  app.post("/calculator/generate-report", async (req: FastifyRequest, reply: FastifyReply) => {
     try {
+      const data = req.body as any; // 👉 ideally define a DTO later
 
-      const data = req.body;
+      // 🔮 Prediction
+      const prediction = await predictExpansionCost(data);
 
-      /*
-      ============================
-      AI COST PREDICTION
-      ============================
-      */
+      // 🤖 AI report
+      const aiText = await generateAIReport(data);
 
-      // const prediction = await predictExpansionCost(data);
-      // console.log("Prediction:", prediction);
-
-      /*
-      ============================
-      AI ADVISORY REPORT
-      ============================
-      */
-console.log("STEP 1: prediction");
-const prediction = await predictExpansionCost(data);
-
-console.log("STEP 2: ai report");
-const aiText = await generateAIReport(data);
-
-// console.log("STEP 3: save lead");
-// await createLeadService({...});
-
-console.log("STEP 4: generate pdf");
-const pdfBuffer = Buffer.from(generatePDF(data, aiText));
-
-// console.log("STEP 5: send client email");
-// await resend.emails.send({...});
-
-// console.log("STEP 6: send owner email");
-// await resend.emails.send({...});
-      // const aiText = await generateAIReport(data);
-
-      /*
-      ============================
-      SAVE LEAD
-      ============================
-      */
-
+      // 💾 Save lead
       await createLeadService({
         ...data,
         estimatedMinCost: prediction.estimated_min_cost,
@@ -158,54 +86,20 @@ const pdfBuffer = Buffer.from(generatePDF(data, aiText));
         aiReport: aiText,
       });
 
-      /*
-      ============================
-      GENERATE PDF
-      ============================
-      */
+      // 📄 PDF
+      const pdfBuffer = Buffer.from(generatePDF(data, aiText));
 
-      // const pdfBuffer = Buffer.from(generatePDF(data, aiText));
-
-      /*
-      ============================
-      CLIENT EMAIL
-      ============================
-      */
-
-      const clientHtml = `
-      <h2>Your AI Expansion Report is Ready</h2>
-
-      <p>Hello <b>${data.fullName}</b>,</p>
-
-      <p>
-      Based on your inputs, our AI advisor has generated your
-      Saudi Arabia expansion strategy report.
-      </p>
-
-      <h3>Estimated Setup Cost</h3>
-
-      <p>
-      SAR ${prediction.estimated_min_cost} -
-      SAR ${prediction.estimated_max_cost}
-      </p>
-
-      <h3>Recommended Setup</h3>
-
-      <p>${prediction.recommended_setup}</p>
-
-      <p>Your detailed report is attached as a PDF.</p>
-
-      <br>
-
-      <b>Nishad Gateway</b>
-      `;
+      /* ================= CLIENT EMAIL ================= */
 
       await resend.emails.send({
         from: "onboarding@resend.dev",
-        // to: data.email,
-        to: "info@blueweb2.com",
+        to: data.email,
         subject: "Your AI KSA Expansion Report",
-        html: clientHtml,
+        html: `
+          <h2>Your AI Expansion Report is Ready</h2>
+          <p>Hello <b>${data.fullName}</b>,</p>
+          <p>SAR ${prediction.estimated_min_cost} - SAR ${prediction.estimated_max_cost}</p>
+        `,
         attachments: [
           {
             filename: "ksa-expansion-report.pdf",
@@ -214,41 +108,13 @@ const pdfBuffer = Buffer.from(generatePDF(data, aiText));
         ],
       });
 
-      /*
-      ============================
-      OWNER EMAIL
-      ============================
-      */
+      /* ================= OWNER EMAIL ================= */
 
       await resend.emails.send({
         from: "onboarding@resend.dev",
         to: "info@blueweb2.com",
         subject: "New KSA Expansion Lead",
-        html: `
-        <h2>New Lead Received</h2>
-
-        <p><b>Name:</b> ${data.fullName}</p>
-        <p><b>Email:</b> info@blueweb2.com</p>
-        <p><b>Mobile:</b> ${data.mobile}</p>
-
-        <hr/>
-
-        <p><b>Investor Type:</b> ${data.investorType}</p>
-        <p><b>Activity:</b> ${data.activity}</p>
-        <p><b>City:</b> ${data.city}</p>
-        <p><b>Timeline:</b> ${data.timeline}</p>
-        <p><b>Visas:</b> ${data.visas}</p>
-
-        <hr/>
-
-        <p><b>Estimated Cost</b></p>
-
-        <p>
-        SAR ${prediction.estimated_min_cost}
-        -
-        SAR ${prediction.estimated_max_cost}
-        </p>
-        `,
+        html: `<p>New lead from ${data.fullName}</p>`,
       });
 
       return {
@@ -257,14 +123,13 @@ const pdfBuffer = Buffer.from(generatePDF(data, aiText));
       };
 
     } catch (err) {
+      req.log.error(err);
 
-  console.error("REPORT ERROR:", err);
-
-  return reply.status(500).send({
-    error: err instanceof Error ? err.message : "Report generation failed",
-  });
-
-}
+      return reply.status(500).send({
+        success: false,
+        message: err instanceof Error ? err.message : "Report generation failed",
+      });
+    }
   });
 
 }

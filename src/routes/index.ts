@@ -22,40 +22,35 @@ import cityContentRoutes from "./cityContent.routes";
 
 
 export default async function routes(app: FastifyInstance) {
-  // Auth/Admin
-  app.register(adminRoutes);
-  
 
- // Blog
+  /* ===== ADMIN ===== */
+  app.register(adminRoutes);
+
+  /* ===== BLOG ===== */
   app.register(blogRoutes, { prefix: "/blogs" });
 
-  // Services module
+  /* ===== CORE MODULES ===== */
   app.register(serviceRoutes);
   app.register(subserviceRoutes);
   app.register(contentRoutes);
 
+  /* ===== CITY SYSTEM ===== */
   app.register(cityRoutes);
   app.register(cityBlogRoutes);
-    app.register(cityCategoryRoutes)
-    app.register(cityBlogPostRoutes);
-    app.register(cityContentRoutes)
+  app.register(cityCategoryRoutes);
+  app.register(cityBlogPostRoutes);
+  app.register(cityContentRoutes);
 
-    app.register(sectorRoutes, { prefix: "/sectors" });
-    app.register(ministryRoutes)
-// calculate expansion cost
-    app.register(calculatorRoutes)
+  /* ===== OTHER ===== */
+  app.register(sectorRoutes, { prefix: "/sectors" });
+  app.register(ministryRoutes);
+  app.register(calculatorRoutes);
+  app.register(contactRoutes);
 
-    // contact form
-    app.register(contactRoutes);
+  /* ===== MEDIA ===== */
+  app.register(uploadRoutes, { prefix: "/upload" });
+  await app.register(mediaCleanupRoutes);
 
- 
-
-
-
- app.register(uploadRoutes, { prefix: "/upload" });
-
-await app.register(mediaCleanupRoutes);
-
+  /* ===== LEADS ===== */
   app.register(leadRoutes);
-
 }

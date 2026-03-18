@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { CityCategoryController } from "../controllers/cityCategory.controller";
 
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 
 import {
   cityIdParamSchema,
@@ -17,6 +17,8 @@ import type {
 } from "../types/routes.types";
 
 export default async function cityCategoryRoutes(app: FastifyInstance) {
+
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
 
   /* ================= PUBLIC ================= */
 
@@ -37,7 +39,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
   app.get<{ Params: CityIdParams }>(
     "/admin/cities/:cityId/categories",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: { params: cityIdParamSchema },
     },
     CityCategoryController.getByCityId
@@ -46,18 +48,16 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
   app.get<{ Params: CityCategoryParams }>(
     "/admin/cities/:cityId/categories/:categoryId",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: { params: categoryIdParamSchema },
     },
     CityCategoryController.getById
   );
 
-  app.post<{
-    Params: CityIdParams;
-  }>(
+  app.post<{ Params: CityIdParams }>(
     "/admin/cities/:cityId/categories",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: cityIdParamSchema,
         body: createCityCategoryBodySchema,
@@ -66,12 +66,10 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
     CityCategoryController.create
   );
 
-  app.put<{
-    Params: CityCategoryParams;
-  }>(
+  app.put<{ Params: CityCategoryParams }>(
     "/admin/cities/:cityId/categories/:categoryId",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: categoryIdParamSchema,
         body: updateCityCategoryBodySchema,
@@ -83,7 +81,7 @@ export default async function cityCategoryRoutes(app: FastifyInstance) {
   app.delete<{ Params: CityCategoryParams }>(
     "/admin/cities/:cityId/categories/:categoryId",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: { params: categoryIdParamSchema },
     },
     CityCategoryController.remove

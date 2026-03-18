@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 import { CityBlogPostController } from "../controllers/cityBlogPost.controller";
 import { CityBlogPostModel } from "../models/cityBlogPost.model";
 
@@ -12,17 +12,16 @@ import {
 
 import { idParamSchema } from "../schemas/common.params";
 import { slugSchema } from "../schemas/common.slug";
+import { env } from "../config/env";
 
 export default async function cityBlogPostRoutes(app: FastifyInstance) {
+
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
+
   /* ======================================================
      PUBLIC ROUTES
   ====================================================== */
 
-  /**
-   * GET CATEGORY BLOG LIST
-   * /cities/:citySlug/:categorySlug
-   * (Must come BEFORE single blog route)
-   */
   app.get(
     "/cities/:citySlug/:categorySlug",
     {
@@ -41,10 +40,6 @@ export default async function cityBlogPostRoutes(app: FastifyInstance) {
     CityBlogPostController.getPublicCategoryBlogs
   );
 
-  /**
-   * GET SINGLE BLOG
-   * /cities/:citySlug/:categorySlug/:blogSlug
-   */
   app.get(
     "/cities/:citySlug/:categorySlug/:blogSlug",
     {
@@ -52,10 +47,7 @@ export default async function cityBlogPostRoutes(app: FastifyInstance) {
         params: publicCityBlogPostParamsSchema,
       },
     },
-    (req, reply) => {
-      console.log("CATEGORY BLOG ROUTE HIT");
-      return CityBlogPostController.getPublicBlogDetail(req, reply);
-    }
+    CityBlogPostController.getPublicBlogDetail
   );
 
   /* ======================================================
@@ -69,21 +61,19 @@ export default async function cityBlogPostRoutes(app: FastifyInstance) {
         "citySlug categorySlug slug updatedAt"
       ).lean();
 
-      const urls = blogs
-        .map((blog) => {
-          const lastMod = blog.updatedAt
-            ? new Date(blog.updatedAt).toISOString()
-            : new Date().toISOString();
+      const urls = blogs.map((blog) => {
+        const lastMod = blog.updatedAt
+          ? new Date(blog.updatedAt).toISOString()
+          : new Date().toISOString();
 
-          return `
-    <url>
-      <loc>${process.env.CLIENT_URL}/cities/${blog.citySlug}/${blog.categorySlug}/${blog.slug}</loc>
-      <lastmod>${lastMod}</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.8</priority>
-    </url>`;
-        })
-        .join("");
+        return `
+<url>
+  <loc>${env.CLIENT_URL}/cities/${blog.citySlug}/${blog.categorySlug}/${blog.slug}</loc>
+  <lastmod>${lastMod}</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.8</priority>
+</url>`;
+      }).join("");
 
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -94,9 +84,11 @@ ${urls}
         .code(200)
         .header("Content-Type", "application/xml")
         .send(xml);
+
     } catch (error) {
       req.log.error(error);
       return reply.code(500).send({
+        success: false,
         message: "Failed to generate sitemap",
       });
     }
@@ -106,13 +98,10 @@ ${urls}
      ADMIN ROUTES
   ====================================================== */
 
-  /**
-   * CREATE BLOG
-   */
   app.post(
     "/admin/cities/:cityId/categories/:categoryId/blogs",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: {
           type: "object",
@@ -129,13 +118,10 @@ ${urls}
     CityBlogPostController.create
   );
 
-  /**
-   * GET BLOGS BY CATEGORY (ADMIN)
-   */
   app.get(
     "/admin/cities/:cityId/categories/:categoryId/blogs",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: {
           type: "object",
@@ -151,13 +137,10 @@ ${urls}
     CityBlogPostController.getByCategoryAdmin
   );
 
-  /**
-   * GET SINGLE BLOG (ADMIN)
-   */
   app.get(
     "/admin/cities/:cityId/categories/:categoryId/blogs/:blogId",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: {
           type: "object",
@@ -174,13 +157,10 @@ ${urls}
     CityBlogPostController.getSingleAdmin
   );
 
-  /**
-   * UPDATE BLOG
-   */
   app.put(
     "/admin/cities/:cityId/categories/:categoryId/blogs/:blogId",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: {
           type: "object",
@@ -198,13 +178,10 @@ ${urls}
     CityBlogPostController.update
   );
 
-  /**
-   * DELETE BLOG
-   */
   app.delete(
     "/admin/cities/:cityId/categories/:categoryId/blogs/:blogId",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         params: {
           type: "object",

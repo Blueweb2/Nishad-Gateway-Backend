@@ -7,7 +7,7 @@ import {
 } from "../controllers/subservice.controller";
 
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 
 import {
   getSubServicesByServiceSchema,
@@ -17,29 +17,43 @@ import {
 } from "../schemas/subservice.schema";
 
 export default async function subserviceRoutes(app: FastifyInstance) {
-  // ✅ Public
+
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
+
+  /* ================= PUBLIC ================= */
+
   app.get(
     "/services/:serviceId/subservices",
     { schema: getSubServicesByServiceSchema },
     getSubServicesByService
   );
 
-  // ✅ Admin Protected
+  /* ================= ADMIN ================= */
+
   app.post(
     "/services/:serviceId/subservices",
-    { preHandler: [auth, adminOnly], schema: createSubServiceSchema },
+    {
+      preHandler: adminAccess,
+      schema: createSubServiceSchema,
+    },
     createSubService
   );
 
   app.put(
     "/subservices/:subId",
-    { preHandler: [auth, adminOnly], schema: updateSubServiceSchema },
+    {
+      preHandler: adminAccess,
+      schema: updateSubServiceSchema,
+    },
     updateSubService
   );
 
   app.delete(
     "/subservices/:subId",
-    { preHandler: [auth, adminOnly], schema: deleteSubServiceSchema },
+    {
+      preHandler: adminAccess,
+      schema: deleteSubServiceSchema,
+    },
     deleteSubService
   );
 }

@@ -8,63 +8,88 @@ import multipart from "@fastify/multipart";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 
-
-
-
-// import fastifyStatic from "@fastify/static";
-// import path from "path";
 import { env } from "./config/env";
-
+import errorHandler from "./plugins/errorHandler";
 
 export const buildApp = async () => {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: {
+      level: env.NODE_ENV === "production" ? "info" : "debug",
+      redact: ["req.headers.authorization"],
+    },
+    trustProxy: true,
+  });
 
-  //  1) cookie first
+  /* ===========================
+     SECURITY FIRST
+  ============================ */
+
+  await app.register(helmet);
+
+  await app.register(rateLimit, {
+    max: 100,
+    timeWindow: "1 minute",
+  });
+
+  /* ===========================
+     CORE PLUGINS
+  ============================ */
+
+  // 🍪 Cookies
   await app.register(fastifyCookie);
 
-  //  2) cors after cookie
-  await app.register(cors, {
-    origin: env.CLIENT_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    preflightContinue: false,
-  });
-  console.log("CLIENT_URL:", env.CLIENT_URL);
+  // 🌐 CORS
+await app.register(cors, {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
 
+    // allow localhost dev + production
+    const allowedOrigins = [
+      env.CLIENT_URL,
+     
+    ];
 
-  //  3) jwt
-await app.register(fastifyJwt, {
-  secret: env.JWT_SECRET,
-  cookie: {
-    cookieName: "admin_access_token",
-    signed: false,
+    if (allowedOrigins.includes(origin)) {
+      return cb(null, true);
+    }
+
+    app.log.warn(`Blocked CORS origin: ${origin}`);
+    return cb(new Error("Not allowed by CORS"), false);
   },
+
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // 🔥 FIX
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 });
 
-  //  4) multipart
+  // 🔐 JWT
+  await app.register(fastifyJwt, {
+    secret: env.JWT_SECRET,
+    cookie: {
+      cookieName: "admin_access_token",
+      signed: false,
+    },
+    sign: {
+      expiresIn: "15m", // ✅ FIXED (removed issuer)
+    },
+  });
+
+  // 📁 Multipart
   await app.register(multipart, {
     limits: {
       fileSize: 10 * 1024 * 1024,
     },
   });
 
-  //  5) static uploads
-  // await app.register(fastifyStatic, {
-  //   root: path.join(process.cwd(), "uploads"),
-  //   prefix: "/uploads/",
-  // });
-
-  //  6) routes
+  /* ===========================
+     ROUTES
+  ============================ */
   await app.register(routes, { prefix: "/api" });
 
- 
-await app.register(helmet);
+  /* ===========================
+     ERROR HANDLER
+  ============================ */
+  await app.register(errorHandler);
 
-
-await app.register(rateLimit, {
-  max: 100,
-  timeWindow: "1 minute",
-});
   return app;
 };

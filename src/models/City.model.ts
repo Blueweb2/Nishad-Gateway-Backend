@@ -1,8 +1,7 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, HydratedDocument } from "mongoose";
+import slugify from "../utils/slugify";
 
-/* ======================================================
-   TYPES
-====================================================== */
+/* ================= TYPES ================= */
 
 export interface ICity extends Document {
   cityName: string;
@@ -20,9 +19,9 @@ export interface ICity extends Document {
   updatedAt: Date;
 }
 
-/* ======================================================
-   SCHEMA
-====================================================== */
+type CityDoc = HydratedDocument<ICity>;
+
+/* ================= SCHEMA ================= */
 
 const CitySchema = new Schema<ICity>(
   {
@@ -34,8 +33,7 @@ const CitySchema = new Schema<ICity>(
 
     citySlug: {
       type: String,
-      required: true,
-      unique: true,
+      unique: true,        // ✅ only this
       lowercase: true,
       trim: true,
     },
@@ -45,14 +43,12 @@ const CitySchema = new Schema<ICity>(
       default: "",
     },
 
-    // NEW FIELD
     heading: {
       type: String,
       required: true,
       trim: true,
     },
 
-    // NEW FIELD
     description: {
       type: String,
       default: "",
@@ -62,6 +58,7 @@ const CitySchema = new Schema<ICity>(
       type: String,
       enum: ["ARTICLE", "FEATURED", "TRENDING"],
       default: "ARTICLE",
+      index: true, // 🔥 useful for filtering
     },
 
     order: {
@@ -77,17 +74,33 @@ const CitySchema = new Schema<ICity>(
   { timestamps: true }
 );
 
-/* ======================================================
-   INDEXES
-====================================================== */
+/* ================= INDEXES ================= */
 
-CitySchema.index({ order: 1 });
-CitySchema.index({ isActive: 1 });
+// 🔥 main listing (MOST IMPORTANT)
 CitySchema.index({ isActive: 1, order: 1 });
 
-/* ======================================================
-   MODEL EXPORT
-====================================================== */
+// 🔥 optional sorting
+CitySchema.index({ createdAt: -1 });
+
+/* ================= SLUG ================= */
+
+CitySchema.pre("save", async function (this: CityDoc) {
+  if (!this.isModified("cityName")) return;
+
+  let baseSlug = slugify(this.cityName);
+  let slug = baseSlug;
+  let count = 1;
+
+  const City = mongoose.models.City;
+
+  while (await City.findOne({ citySlug: slug })) {
+    slug = `${baseSlug}-${count++}`;
+  }
+
+  this.citySlug = slug;
+});
+
+/* ================= EXPORT ================= */
 
 export const CityModel =
   mongoose.models.City ||

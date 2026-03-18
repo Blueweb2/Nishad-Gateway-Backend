@@ -12,48 +12,49 @@ import {
 } from "../controllers/admin.controller";
 
 import { auth } from "../middlewares/auth";
-import { requireSuperAdmin } from "../middlewares/requireSuperAdmin";
+import { authorize } from "../middlewares/authorize";
 
 import { AdminLogsRoute, IdRoute } from "../types/routes.types";
 
 export default async function adminRoutes(app: FastifyInstance) {
 
   /* ===========================
-     PUBLIC ROUTES
+     ROUTE PREFIX GROUPING
   ============================ */
-  app.post("/admin/login", loginAdminController);
-  app.post("/admin/refresh", refreshAdminTokenController);
+  app.register(async function (admin) {
 
-  /* ===========================
-     AUTHENTICATED ROUTES
-  ============================ */
-  app.post("/admin/logout", { preHandler: [auth] }, logoutAdminController);
-  app.get("/admin/me", { preHandler: [auth] }, adminMeController);
+    /* ---------- PUBLIC ---------- */
+    admin.post("/login", loginAdminController);
+    admin.post("/refresh", refreshAdminTokenController);
 
-  /* ===========================
-     SUPERADMIN ONLY ROUTES
-  ============================ */
-  app.get(
-    "/admin/list",
-    { preHandler: [auth, requireSuperAdmin] },
-    listAdminsController
-  );
+    /* ---------- AUTH ---------- */
+    admin.post("/logout", { preHandler: [auth] }, logoutAdminController);
+    admin.get("/me", { preHandler: [auth] }, adminMeController);
 
-  app.post(
-    "/admin/create",
-    { preHandler: [auth, requireSuperAdmin] },
-    createAdminController
-  );
+    /* ---------- SUPERADMIN ---------- */
+    admin.get(
+      "/list",
+      { preHandler: [auth, authorize(["superadmin"])] },
+      listAdminsController
+    );
 
-  app.delete<IdRoute>(
-    "/admin/:id",
-    { preHandler: [auth, requireSuperAdmin] },
-    deleteAdminController
-  );
+    admin.post(
+      "/create",
+      { preHandler: [auth, authorize(["superadmin"])] },
+      createAdminController
+    );
 
-  app.get<AdminLogsRoute>(
-    "/admin/logs",
-    { preHandler: [auth, requireSuperAdmin] },
-    getAdminLogsController
-  );
+    admin.delete<IdRoute>(
+      "/:id",
+      { preHandler: [auth, authorize(["superadmin"])] },
+      deleteAdminController
+    );
+
+    admin.get<AdminLogsRoute>(
+      "/logs",
+      { preHandler: [auth, authorize(["superadmin"])] },
+      getAdminLogsController
+    );
+
+  }, { prefix: "/admin" }); // 🔥 THIS IS THE KEY
 }

@@ -5,20 +5,20 @@ import { env } from "../config/env";
 
 async function corsPlugin(app: FastifyInstance) {
   await app.register(cors, {
-    origin: (origin, callback) => {
-      // Allow SSR, Postman, curl (no origin)
-      if (!origin) return callback(null, true);
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
 
       if (origin === env.CLIENT_URL) {
-        return callback(null, true);
+        return cb(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"), false);
+      app.log.warn(`Blocked CORS origin: ${origin}`);
+      return cb(new Error("Not allowed by CORS"), false);
     },
     credentials: true,
   });
 
-  app.log.info(`CORS enabled for ${env.CLIENT_URL}`);
+  app.log.info(`🌐 CORS enabled for ${env.CLIENT_URL}`);
 }
 
 export default fp(corsPlugin);

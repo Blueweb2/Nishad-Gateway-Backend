@@ -31,8 +31,8 @@ export const createSectorSchema = {
 
       blocks: {
         type: "array",
-        minItems: 1,
         items: sectorBlockSchema,
+        default: [],
       },
 
       coverImage: {

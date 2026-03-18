@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import * as SectorController from "../controllers/sector.controller";
 import { auth } from "../middlewares/auth";
-import { adminOnly } from "../middlewares/adminOnly";
+import { authorize } from "../middlewares/authorize";
 
 import {
   SectorSlugRoute,
@@ -19,18 +19,20 @@ import {
 
 export async function sectorRoutes(app: FastifyInstance) {
 
+  const adminAccess = [auth, authorize(["admin", "superadmin"])];
+
   /* ================= ADMIN ================= */
 
   app.get(
     "/admin",
-    { preHandler: [auth, adminOnly] },
+    { preHandler: adminAccess },
     SectorController.getAdmin
   );
 
   app.post<CreateSectorRoute>(
     "/admin",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: createSectorSchema,
     },
     SectorController.createSector
@@ -39,7 +41,7 @@ export async function sectorRoutes(app: FastifyInstance) {
   app.get<IdRoute>(
     "/admin/:id",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: sectorIdParamsSchema,
     },
     SectorController.getById
@@ -48,7 +50,7 @@ export async function sectorRoutes(app: FastifyInstance) {
   app.put<UpdateSectorRoute>(
     "/admin/:id",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: {
         ...updateSectorSchema,
         params: sectorIdParamsSchema.params,
@@ -60,7 +62,7 @@ export async function sectorRoutes(app: FastifyInstance) {
   app.delete<IdRoute>(
     "/admin/:id",
     {
-      preHandler: [auth, adminOnly],
+      preHandler: adminAccess,
       schema: sectorIdParamsSchema,
     },
     SectorController.deleteSector

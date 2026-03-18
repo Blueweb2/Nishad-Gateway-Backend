@@ -3,19 +3,34 @@ import { sendResponse } from "../utils/response";
 
 export const auth = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
-    const token = req.cookies?.admin_access_token ||
-      req.headers.authorization?.replace("Bearer ", "");
-    console.log("Incoming cookies:", req.cookies);
+    let token: string | undefined;
 
-
-    if (!token) {
-      return sendResponse(reply, 401, false, "Unauthorized", null);
+    // ✅ Prefer cookie (secure httpOnly)
+    if (req.cookies?.admin_access_token) {
+      token = req.cookies.admin_access_token;
     }
 
-    // ✅ verify using fastify decorator
+    // ✅ Fallback to Authorization header
+    else if (req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return reply.status(401).send({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // 🔥 attach token manually (important for fastify-jwt)
+    req.headers.authorization = `Bearer ${token}`;
+
     await req.jwtVerify();
 
   } catch (err) {
-    return sendResponse(reply, 401, false, "Invalid token", null);
+    return reply.status(401).send({
+      success: false,
+      message: "Invalid or expired token",
+    });
   }
 };

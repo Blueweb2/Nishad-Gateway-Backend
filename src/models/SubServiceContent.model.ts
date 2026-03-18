@@ -1,5 +1,7 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document, Types, HydratedDocument } from "mongoose";
 import crypto from "crypto";
+
+/* ================= TYPES ================= */
 
 export interface ISubServiceContent extends Document {
   subServiceId: Types.ObjectId;
@@ -49,12 +51,12 @@ export interface ISubServiceContent extends Document {
     subImage: string;
   }[];
 
-entityChooseHeading: string;
-entityChooseSubheading: string;
-entityChooseQuestions: {
-  description: string;
-  linkUrl: string;
-}[];
+  entityChooseHeading: string;
+  entityChooseSubheading: string;
+  entityChooseQuestions: {
+    description: string;
+    linkUrl: string;
+  }[];
 
   ownershipHeading: string;
   ownershipTabOneLabel?: string;
@@ -68,10 +70,12 @@ entityChooseQuestions: {
 
   documentsHeading: string;
   documentsSubheading: string;
+
   documentEntityTabs: {
     label: string;
     value: string;
   }[];
+
   documentGroups: {
     entityValue: string;
     cards: {
@@ -79,15 +83,6 @@ entityChooseQuestions: {
       items: string[];
       icon?: string;
     }[];
-  }[];
-
-  introHeading: string;
-  introText: string;
-
-  sections: {
-    heading: string;
-    text: string;
-    image?: string;
   }[];
 
   faqHeading: string;
@@ -102,6 +97,10 @@ entityChooseQuestions: {
   updatedAt: Date;
 }
 
+type Doc = HydratedDocument<ISubServiceContent>;
+
+/* ================= SCHEMA ================= */
+
 const SubServiceContentSchema = new Schema<ISubServiceContent>(
   {
     subServiceId: {
@@ -109,6 +108,7 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       ref: "SubService",
       required: true,
       unique: true,
+      index: true, // 🔥 IMPORTANT
     },
 
     sectionOrder: {
@@ -126,7 +126,6 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     },
 
     /* ================= HERO ================= */
-
     heroTitle: { type: String, default: "" },
     heroSubtitle: { type: String, default: "" },
     heroDescription: { type: String, default: "" },
@@ -135,40 +134,28 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     heroImage: { type: String, default: "" },
 
     /* ================= WHY ================= */
-
     whyHeading: { type: String, default: "" },
-
     whySlides: {
       type: [
         {
-          title: { type: String, default: "" },
-          description: { type: String, default: "" },
-          image: { type: String, default: "" },
+          title: String,
+          description: String,
+          image: String,
         },
       ],
       default: [],
     },
-
     whyCtaText: { type: String, default: "" },
     whyCtaLink: { type: String, default: "" },
 
     /* ================= ENTITY TABLE ================= */
-
     entityTableHeading: { type: String, default: "" },
 
     entityTableColumns: {
       type: [
         {
-          key: {
-            type: String,
-            required: true,   // ✅ key must exist
-            trim: true,
-          },
-          label: {
-            type: String,
-            required: true,   // ✅ label must exist
-            trim: true,
-          },
+          key: { type: String, required: true },
+          label: { type: String, required: true },
         },
       ],
       default: [
@@ -181,7 +168,6 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       ],
     },
 
-    // ✅ FIXED — No auto default row
     entityTableRows: {
       type: [
         {
@@ -189,37 +175,49 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
             type: String,
             default: () => crypto.randomUUID(),
           },
-          entityType: { type: String, default: "" },
-          ownership: { type: String, default: "" },
-          bestFor: { type: String, default: "" },
-          capital: { type: String, default: "" },
-          regulatoryBody: { type: String, default: "" },
-          timeToSetup: { type: String, default: "" },
-          icon: { type: String, default: "" },
+          entityType: String,
+          ownership: String,
+          bestFor: String,
+          capital: String,
+          regulatoryBody: String,
+          timeToSetup: String,
+          icon: String,
         },
       ],
-      default: [],   // ✅ Important fix
+      default: [],
     },
 
     /* ================= ENTITY TYPES ================= */
-
     entityTypesHeading: { type: String, default: "" },
     entityTypesDescription: { type: String, default: "" },
 
     entityTypesSlides: {
       type: [
         {
-          title: { type: String, default: "" },
-          description: { type: String, default: "" },
-          mainImage: { type: String, default: "" },
-          subImage: { type: String, default: "" },
+          title: String,
+          description: String,
+          mainImage: String,
+          subImage: String,
+        },
+      ],
+      default: [],
+    },
+
+    /* ================= ENTITY CHOOSE ================= */
+    entityChooseHeading: { type: String, default: "" },
+    entityChooseSubheading: { type: String, default: "" },
+
+    entityChooseQuestions: {
+      type: [
+        {
+          description: String,
+          linkUrl: String,
         },
       ],
       default: [],
     },
 
     /* ================= OWNERSHIP ================= */
-
     ownershipHeading: { type: String, default: "" },
     ownershipTabOneLabel: { type: String, default: "" },
     ownershipTabTwoLabel: { type: String, default: "" },
@@ -227,24 +225,23 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
     ownershipSlides: {
       type: [
         {
-          title: { type: String, default: "" },
-          leftText: { type: String, default: "" },
-          rightText: { type: String, default: "" },
-          image: { type: String, default: "" },
+          title: String,
+          leftText: String,
+          rightText: String,
+          image: String,
         },
       ],
       default: [],
     },
 
     /* ================= DOCUMENTS ================= */
-
     documentsHeading: { type: String, default: "" },
     documentsSubheading: { type: String, default: "" },
 
     documentEntityTabs: {
       type: [
         {
-          label: { type: String, default: "" },
+          label: String,
           value: { type: String, required: true },
         },
       ],
@@ -255,35 +252,31 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       type: [
         {
           entityValue: { type: String, required: true },
-          cards: {
-            type: [
-              {
-                title: { type: String, default: "" },
-                items: { type: [String], default: [] },
-                icon: { type: String, default: "" },
-              },
-            ],
-            default: [],
-          },
+          cards: [
+            {
+              title: String,
+              items: [String],
+              icon: String,
+            },
+          ],
         },
       ],
       default: [],
     },
 
     /* ================= FAQ ================= */
-
     faqHeading: {
       type: String,
       default: "Frequently Asked Questions",
     },
-    faqImage: { type: String, default: "" },
-    faqCtaText: { type: String, default: "" },
+    faqImage: String,
+    faqCtaText: String,
 
     faqs: {
       type: [
         {
-          q: { type: String, default: "" },
-          a: { type: String, default: "" },
+          q: String,
+          a: String,
         },
       ],
       default: [],
@@ -293,6 +286,7 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
       type: String,
       enum: ["draft", "published"],
       default: "draft",
+      index: true,
     },
 
     publishedAt: {
@@ -303,7 +297,18 @@ const SubServiceContentSchema = new Schema<ISubServiceContent>(
   { timestamps: true }
 );
 
+/* ================= AUTO PUBLISH ================= */
+
+SubServiceContentSchema.pre("save", function (this: Doc) {
+  if (this.isModified("status") && this.status === "published") {
+    this.publishedAt = new Date();
+  }
+});
+
+/* ================= MODEL ================= */
+
 export const SubServiceContentModel =
+  mongoose.models.SubServiceContent ||
   mongoose.model<ISubServiceContent>(
     "SubServiceContent",
     SubServiceContentSchema
