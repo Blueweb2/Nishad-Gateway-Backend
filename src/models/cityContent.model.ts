@@ -16,6 +16,7 @@ export interface ICityContent extends Document {
 
   coverImage?: string;
   coverImagePublicId?: string;
+  coverImageAlt?: string;
 
   type: "overview" | "listing";
 
@@ -87,15 +88,22 @@ const CityContentSchema = new Schema<ICityContent>(
       default: "",
     },
 
-    coverImage: {
-      type: String,
-      default: "",
-    },
+ 
 
-    coverImagePublicId: {
-      type: String,
-      default: "",
-    },
+    coverImage: {
+  type: String,
+  default: "",
+},
+
+coverImagePublicId: {
+  type: String,
+  default: "",
+},
+
+coverImageAlt: {
+  type: String,
+  default: "",
+},
 
     type: {
       type: String,

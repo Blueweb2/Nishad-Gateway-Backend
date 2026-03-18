@@ -6,6 +6,7 @@ interface ContactBody {
   phone: string;
   email: string;
   service: string;
+  serviceName: string;
   city: string;
 }
 
@@ -14,7 +15,7 @@ export const sendContactEmail = async (
   reply: FastifyReply
 ) => {
   try {
-    const { name, phone, email, service, city } = request.body;
+    const { name, phone, email, serviceName, city } = request.body;
 
     await resend.emails.send({
       from: "Nishad Gateway <onboarding@resend.dev>",
@@ -26,7 +27,7 @@ export const sendContactEmail = async (
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Phone:</strong> ${phone}</p>
         <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Service:</strong> ${service}</p>
+        <p><strong>Service:</strong> ${serviceName}</p>
         <p><strong>City:</strong> ${city}</p>
       `,
     });
