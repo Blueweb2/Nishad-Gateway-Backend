@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
-type Role = "admin" | "superadmin" | "user";
+type Role = "admin" | "superadmin";
 
 export const authorize = (roles: Role[]) => {
   return async (req: FastifyRequest, reply: FastifyReply) => {

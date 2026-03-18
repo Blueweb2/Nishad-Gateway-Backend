@@ -11,8 +11,7 @@ export const loginAdminService = async (
   email: string,
   password: string
 ) => {
-  const admin = await Admin.findOne({ email });
-
+const admin = await Admin.findOne({ email }).select("+password");
   if (!admin) {
     throw createError(401, "Admin not found");
   }
@@ -22,6 +21,9 @@ export const loginAdminService = async (
   if (!isMatch) {
     throw createError(401, "Invalid password");
   }
+  if (!admin.password) {
+  throw createError(500, "Password not found in DB");
+}
 
   const { accessToken, refreshToken } = createAdminTokens(app, admin);
 
