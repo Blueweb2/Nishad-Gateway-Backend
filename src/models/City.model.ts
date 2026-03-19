@@ -6,7 +6,10 @@ import slugify from "../utils/slugify";
 export interface ICity extends Document {
   cityName: string;
   citySlug: string;
+
   cityImage: string;
+  cityImageAlt?: string;
+  cityImagePublicId?: string;
 
   heading: string;
   description: string;
@@ -33,15 +36,30 @@ const CitySchema = new Schema<ICity>(
 
     citySlug: {
       type: String,
-      unique: true,        //  only this
+      unique: true,
       lowercase: true,
       trim: true,
     },
+
+    /* ================= IMAGE ================= */
 
     cityImage: {
       type: String,
       default: "",
     },
+
+    cityImageAlt: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    cityImagePublicId: {
+      type: String,
+      default: "",
+    },
+
+    /* ================= CONTENT ================= */
 
     heading: {
       type: String,
@@ -54,11 +72,13 @@ const CitySchema = new Schema<ICity>(
       default: "",
     },
 
+    /* ================= META ================= */
+
     tag: {
       type: String,
       enum: ["ARTICLE", "FEATURED", "TRENDING"],
       default: "ARTICLE",
-      index: true, // 🔥 useful for filtering
+      index: true,
     },
 
     order: {

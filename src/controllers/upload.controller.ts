@@ -3,19 +3,16 @@ import { sendResponse } from "../utils/response";
 
 import { getSignedCloudinaryUploadParamsService } from "../services/cloudinarySigned.service";
 import { deleteCloudinaryImageService } from "../services/cloudinary.service";
+import { CLOUDINARY_FOLDERS } from "../constants/cloudinaryFolders";
 
+/* ================= SIGNED UPLOAD ================= */
 
-// ===================================
-//  SIGNED UPLOAD PARAMS (secure flow)
-// ===================================
 export const getSignedUpload = async (
   req: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
     const { folder } = req.query as { folder?: string };
-    
-console.log(folder,"folder");
 
     if (!folder || folder.trim() === "") {
       return sendResponse(reply, 400, false, "Folder is required", null);
@@ -23,56 +20,20 @@ console.log(folder,"folder");
 
     const cleanFolder = folder.trim();
 
-    // Allowed folders (security)
-    const allowedFolders = [
-      "nishad-gateway/subservices",
-      "nishad-gateway/blogs",
-      "nishad-gateway/cities",
-      "nishad-gateway/cities/hero",
-      "nishad-gateway/subservices/icons",
-      "nishad-gateway/cities/vision",
-      "nishad-gateway/cities/investment",
-      "nishad-gateway/cities/infrastructure",
-      "nishad-gateway/cities/food-guide",
-      "nishad-gateway/cities/transportation",
-      "nishad-gateway/cities/snapshot",
-      "nishad-gateway/cities/future-outlook",
-      "nishad-gateway/sectors/icons",
-      "nishad-gateway/sectors/hero",
-      "nishad-gateway/ministries/covers",
-      "nishad-gateway/ministries/logos",
-      "nishad-gateway/ministries/slides",
-      "nishad-gateway/ministries/faq",
-      "nishad-gateway/ministries/cards",
-      "nishad-gateway/cities/categories/listings",
-      "nishad-gateway/cities/categories/overview",
-      "nishad-gateway/editor",
-    ];
-
-
-
-allowedFolders.forEach((f, i) => {
-  console.log(
-    `Allowed[${i}]:`,
-    JSON.stringify(f),
-    "Length:",
-    f.length,
-    "Match:",
-    f === cleanFolder
-  );
-});
-
-console.log("---- DEBUG END ----");
-
-    if (!allowedFolders.includes(cleanFolder)) {
+    /* ✅ VALIDATION USING CONSTANT */
+    if (!CLOUDINARY_FOLDERS.includes(cleanFolder)) {
       return sendResponse(reply, 403, false, "Invalid folder", null);
     }
-    console.log("Allowed folders:", allowedFolders);
-console.log("Received:", cleanFolder);
 
     const signed = await getSignedCloudinaryUploadParamsService(cleanFolder);
 
-    return sendResponse(reply, 200, true, "Signed upload generated", signed);
+    return sendResponse(
+      reply,
+      200,
+      true,
+      "Signed upload generated",
+      signed
+    );
   } catch (err: any) {
     req.log.error(err);
 
@@ -86,10 +47,8 @@ console.log("Received:", cleanFolder);
   }
 };
 
+/* ================= DELETE IMAGE ================= */
 
-// ===================================
-// DELETE IMAGE
-// ===================================
 export const deleteImage = async (
   req: FastifyRequest,
   reply: FastifyReply
@@ -97,7 +56,7 @@ export const deleteImage = async (
   try {
     const { publicId } = req.body as { publicId?: string };
 
-    if (!publicId) {
+    if (!publicId || publicId.trim() === "") {
       return sendResponse(reply, 400, false, "publicId is required", null);
     }
 

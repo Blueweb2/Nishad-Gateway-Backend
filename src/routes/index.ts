@@ -17,6 +17,7 @@ import ministryRoutes from "./ministry.routes";
 import calculatorRoutes from "./calculator.routes";
 import contactRoutes from "./contact.routes";
 import cityContentRoutes from "./cityContent.routes";
+import cloudinaryRoutes from "./cloudinary.routes";
 
 
 
@@ -50,7 +51,7 @@ export default async function routes(app: FastifyInstance) {
   /* ===== MEDIA ===== */
   app.register(uploadRoutes, { prefix: "/upload" });
   await app.register(mediaCleanupRoutes);
-
+app.register(cloudinaryRoutes, { prefix: "/cloudinary" });
   /* ===== LEADS ===== */
   app.register(leadRoutes);
 }

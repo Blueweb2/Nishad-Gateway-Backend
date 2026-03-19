@@ -17,25 +17,41 @@ export const cityBaseSchema = {
     pattern: "^[a-z0-9-]+$",
   },
 
+  /* ================= IMAGE ================= */
+
   cityImage: {
     anyOf: [
       { type: "string", format: "uri" },
-      { type: "string", maxLength: 0 }
+      { type: "string", maxLength: 0 }, // allow empty
     ],
   },
 
-  //  NEW FIELD
+  // ✅ NEW
+  cityImageAlt: {
+    type: "string",
+    maxLength: 150,
+  },
+
+  // ✅ NEW
+  cityImagePublicId: {
+    type: "string",
+    maxLength: 200,
+  },
+
+  /* ================= CONTENT ================= */
+
   heading: {
     type: "string",
     minLength: 2,
     maxLength: 150,
   },
 
-  //  NEW FIELD
   description: {
     type: "string",
     maxLength: 2000,
   },
+
+  /* ================= META ================= */
 
   tag: {
     type: "string",
@@ -54,7 +70,6 @@ export const cityBaseSchema = {
     default: true,
   },
 };
-
 
 // schemas/city.create.schema.ts
 
