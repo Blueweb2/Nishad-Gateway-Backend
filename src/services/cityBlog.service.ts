@@ -215,10 +215,12 @@ async upsert(
     this.validateSections(sections, status);
 
     // 🔐 Deep sanitize entire content object (future-proof)
-    const sanitizedSections = sections.map((section) => ({
-      ...section,
-      content: deepSanitize(section.content),
-    }));
+  const sanitizedSections = sections.map((section) => ({
+  ...section,
+  content: deepSanitize(section.content),
+}));
+
+const normalizedSectionsWithAlt = normalizeImageAlt(sanitizedSections);
 
     // 📊 Normalize order
     const normalizedSections = [...sanitizedSections]
@@ -363,3 +365,59 @@ async upsert(
     };
   },
 };
+function normalizeImageAlt(sections: any[]) {
+  return sections.map((section) => {
+    const content = section.content;
+
+    switch (section.type) {
+
+      case "HERO":
+        content.backgroundImageAlt =
+          content.backgroundImageAlt || content.heading || "City image";
+        break;
+
+      case "VISION":
+        content.imageAlt =
+          content.imageAlt || content.heading || "city vision image";
+        break;
+
+      case "INFRASTRUCTURE":
+        content.slides?.forEach((slide: any) => {
+          slide.imageAlt = slide.imageAlt || slide.title || "city infrastructure image";
+        });
+        break;
+
+      case "FOOD_GUIDE":
+        content.filters?.forEach((filter: any) => {
+          filter.items?.forEach((item: any) => {
+            item.imageAlt = item.imageAlt || item.title || "food guide image";
+          });
+        });
+        break;
+
+      case "TRANSPORTATION_GUIDE":
+        content.slides?.forEach((slide: any) => {
+          slide.backgroundImageAlt =
+            slide.backgroundImageAlt || slide.title || "transportation image";
+        });
+        break;
+
+      case "EXPANDABLE_SNAPSHOT":
+        content.cards?.forEach((card: any) => {
+          card.imageAlt = card.imageAlt || card.caption || "expandable snapshot image";
+        });
+        break;
+
+      case "FUTURE_OUTLOOK":
+        content.slides?.forEach((slide: any) => {
+          slide.imageAlt = slide.imageAlt || slide.title || "future outlook image";
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    return section;
+  });
+}
